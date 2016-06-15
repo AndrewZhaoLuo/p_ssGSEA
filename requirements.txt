@@ -1,0 +1,4 @@
+numpy==1.11.0
+rpy2==2.8.1
+rpy2-bioconductor-extensions==0.2.5.dev0
+six==1.10.0
