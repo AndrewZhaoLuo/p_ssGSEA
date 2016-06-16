@@ -27,11 +27,11 @@ y = [1, 2, 4, 8]
 rplot(x, y, type = "b", main = "Test", xlab = "x", ylab = "y")
 
 '''
-*************
-* CONSTANTS *
-*************
+************
+* BUILT IN *
+************
 '''
-#Yes you can print them!
+#Yes you can use them!
 print(R("pi"))
 print(R("version"))
 
@@ -41,6 +41,7 @@ print(R("version"))
 ***********
 '''
 
+#downloads the bioc packages we want
 REINSTALL = False
 if REINSTALL:
     from rpy2.robjects.packages import importr
@@ -54,7 +55,7 @@ if REINSTALL:
     bioclite("GSEABase")
     bioclite("grndata")
 
-#importing packages
+#importing packages installed
 from rpy2.robjects.packages import importr
 importr("grndata")
 importr("GSEABase")

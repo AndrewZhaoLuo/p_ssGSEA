@@ -5,7 +5,7 @@ import timeit
 Simulates shuffling a deck of cards, checking whether a certain sample of cards is on "top" of the deck.
 The "top" of the deck is considered to be the index 0.
 
-num_cards           =   number of cards to include in the deck, they will be numbered from [0, num_cards]. should be
+num_cards           =   number of cards to include in the deck, they will be numbered from [0, num_cards). should be
                         positive
 
 cutoff_index        =   cards being sampled should, after shuffling in the deck, be above or equal to this index.
@@ -24,9 +24,10 @@ def shufflesim(num_cards, cutoff_index, sample_size, num_trials):
     num_success = 0
     num_fails = 0
 
+    check = lambda deck: sum([1 for x in range(0, cutoff_index + 1) if deck[x] < sample_size]) == sample_size
+
     for trial in range(0, num_trials):
         shuffledDeck = random.permutation(num_cards)
-        check = lambda deck: sum([1 for x in range(0, cutoff_index + 1) if deck[x] < sample_size]) == sample_size
 
         #check to see if cards aren't where its supposed to be (below cutoff)
         if check(shuffledDeck):
