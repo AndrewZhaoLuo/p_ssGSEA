@@ -74,9 +74,10 @@ def plot_multidist(num_samples, mus, sigmas, title):
     values = sample_multi_dist(num_samples, mus, sigmas)
     sea.distplot(values)
 
+    plotter.title("SAMPLE=" + str(num_samples) + " MU=" + str(mus) + " SIGMA=" + str(sigmas))
     plotter.savefig(title)
     plotter.close()
 
 if __name__ == "__main__":
-    plot_sigma_samplesize(SAMPLE_NUMBERS, SIGMA, (24,24), "Single_Distribution_Test")
-    plot_multidist([1000, 1000], [0, 1000], [100, 100], "Double_Distribution_Test")
+    #plot_sigma_samplesize(SAMPLE_NUMBERS, SIGMA, (24,24), "Single_Distribution_Test")
+    plot_multidist([10000, 10000], [0, 200], [90, 100], "Double_Distribution_Test")

@@ -1,0 +1,14 @@
+Put in the Data/Hybrid folder
+
+See paper add. doc 1 for more details:
+
+BC:
+http://bioinformatics.nki.nl/data/ (main site)
+http://bioinformatics.nki.nl/data/ZipFiles295Samples.zip (file)
+
+LC:
+FTP:
+ftp://caftpd.nci.nih.gov/pub/caARRAY/experiments/caArray_jacob-00182/
+
+MM:
+http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE2658
