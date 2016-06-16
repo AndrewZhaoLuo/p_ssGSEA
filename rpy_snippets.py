@@ -8,7 +8,7 @@ Plotting
 #built in objects in R
 import rpy2.robjects as robjects
 
-#the main interpreter
+#the main interpreter, uses installed R global enviroment
 from rpy2.robjects import r as R
 
 '''
@@ -32,11 +32,32 @@ rplot(x, y, type = "b", main = "Test", xlab = "x", ylab = "y")
 *************
 '''
 #Yes you can print them!
-print(R('pi'))
+print(R("pi"))
+print(R("version"))
 
 '''
 ***********
 * IMPORTS *
 ***********
 '''
-#You can also import packages from R and use them!
+
+REINSTALL = False
+if REINSTALL:
+    from rpy2.robjects.packages import importr
+    base = importr('base')
+
+    #evaluate locally a remote R script
+    base.source("http://www.bioconductor.org/biocLite.R")
+    bioclite = R("biocLite")
+
+    #download and install gsea stuff
+    bioclite("GSEABase")
+    bioclite("grndata")
+
+#importing packages
+from rpy2.robjects.packages import importr
+importr("grndata")
+importr("GSEABase")
+
+#check to see packages loaded
+print(R("sessionInfo()"))
