@@ -51,7 +51,7 @@ if __name__ == "__main__":
     connection = sqlite3.connect("GeneExpression.db")
 
     cursor = connection.cursor()
-    rebuild_BC_db(cursor)
+    #rebuild_BC_db(cursor)
 
     connection.commit()
 
