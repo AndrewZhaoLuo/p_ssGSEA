@@ -10,7 +10,7 @@ import matplotlib.pyplot as plotter
 import seaborn as sea
 
 SIGMA = [100, 1000, 10000]
-SAMPLE_NUMBERS = [100, 1000, 10000]
+SAMPLE_NUMBERS = [10, 100, 1000]
 
 '''
 Returns a set of points sampled from a distribution
@@ -60,7 +60,7 @@ def plot_sigma_samplesize(sample_numbers, sigmas, size, title):
             sigma = sigmas[b]
 
             values = sample_dist(sample_num, mu=0, sigma=sigma)
-            sea.distplot(values, ax=axes[b,a], axlabel=("SAMPLE=" + str(sample_num) + "    " + "SIGMA=" + str(sigma)))
+            sea.distplot(values, ax=axes[b,a], axlabel=("#SAMPLES=" + str(sample_num) + "    " + "SIGMA=" + str(sigma)))
 
     plotter.savefig(title)
     plotter.close()
@@ -80,4 +80,4 @@ def plot_multidist(num_samples, mus, sigmas, title):
 
 if __name__ == "__main__":
     #plot_sigma_samplesize(SAMPLE_NUMBERS, SIGMA, (24,24), "Single_Distribution_Test")
-    plot_multidist([10000, 10000], [0, 200], [90, 100], "Double_Distribution_Test")
+    plot_multidist([10000, 10000], [0, 0], [100, 500], "Double_Distribution_Test")
