@@ -1,5 +1,7 @@
 '''
 This is a simple series of script which
+
+IN GENERAL THIS MESSES WITH THE DB SCHEMA, DONT MESS WITH UNLESS YOU KNOW WHAT YOU ARE DOING!!!
 '''
 
 import sqlite3
@@ -34,6 +36,9 @@ def load_BC_data(cursor):
                         profile.esr1, profile.nih, profile.st_gallen, profile.conserv,
                         profile.c1_from_data, profile.c1_cross_valid, profile.c1_used))
 
+'''
+Tears down and rebuild BC database (PLEASE DON'T CALL UNLESS YOU KNOW WHAT YOU ARE DOING!!!!!)
+'''
 def rebuild_BC_db(cursor):
     print("Rebuilding BC database...")
     start = timeit.default_timer()
