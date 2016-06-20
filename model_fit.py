@@ -17,76 +17,135 @@ from process_BC_data import sample
 from process_BC_data import expression_profile
 from process_BC_data import clinical_data
 
-print("Processing data...")
-start = timeit.default_timer()
+'''
+x should data points of the intensity of the gene in question
+y should be the corresponding class of each sample, supports only binary 1 and 0 for now
 
-#first process data
-clinical_profiles = []
-for profile in read_dumped_data("BC_clinical_profiles.pkl"):
-    clinical_profiles.append(profile)
+plot = boolean value whether to plot the resulting classifier's frequency curve
+title = title of graph to plot
 
-clinical_profiles.sort(key=lambda profile: profile.sample_num)
+no test/train split since this is a clustering model
 
-samples = []
-for profile in read_dumped_data("BC_expression_profiles.pkl"):
-   samples.append(profile)
+returns the trained model
+'''
+def fit_test_model(x):
+    gauss_model = GMM(n_components=2, n_init=5, n_iter=1000)
+    gauss_model.fit(x)
 
-end = timeit.default_timer()
-print("\tDone! Took" + str(end - start) + "s")
-
-print("Grabbing genes...")
-start = timeit.default_timer()
-
-
-#extract gene of interest from people
-#splitting into two groups: those with pos nodes and those without (cancer)
-gene = "ERBB2"
+    return gauss_model
 
 '''
-ToDo: implement maping of num to profile and vice versa for that sexy linear time
+Given a gauss mix model, prints parameters for each seperate peak
 '''
-pos_expression_profiles = []
-neg_expression_profiles = []
-for sample in samples:
-    sample_num = sample.sample_num
+def print_model_params(gauss_model):
+    coeffs = gauss_model.weights_
+    mus = [x[0] for x in gauss_model.means_]
+    sigmas = [x[0] for x in gauss_model.covars_]
 
-    #extract the profile of interest
-    profiles = sample.profiles
-    gene_profile = ([p for p in profiles if p.gene == gene])[0]
+    string = ("Gaussian model: " + str(gauss_model)) + '\n'
+    string += ("Coeff:\t" + str(coeffs)) + '\n'
+    string += ("Mus:\t" + str(mus)) + '\n'
+    string += ("Sigmas:\t" + str(sigmas)) + '\n'
 
-    #check if patient has cancer
-    for i in range(0, len(clinical_profiles)):
-        if clinical_profiles[i].sample_num == sample_num:
-            if clinical_profiles[i].st_gallen == 0:
-                pos_expression_profiles.append(gene_profile)
-            else:
-                neg_expression_profiles.append(gene_profile)
-            break
+    print(string)
 
-end = timeit.default_timer()
-print("\tDone! Took" + str(end - start) + "s")
+'''
+prints out information how the given model clusters and classified real data
+Assuems 1D features
+'''
+def print_test_model(x, Y, gauss_model):
+    Y_h = gauss_model.predict(x)
 
-print("Fitting Models...")
-start = timeit.default_timer()
+    tp = 0
+    fp = 0
+    tn = 0
+    fn = 0
+    for i in range(0, len(Y)):
+        if Y[i] == 1 and Y_h[i] == 1:
+            tp += 1
+        elif Y[i] == 1 and Y_h[i] == 0:
+            fn += 1
+        elif Y[i] == 0 and Y_h[i] == 0:
+            tn += 1
+        elif Y[i] == 0 and Y_h[i] == 1:
+            fp += 1
 
-pos_expression_intensity = [[p.intensity] for p in pos_expression_profiles]
-neg_expression_intensity = [[p.intensity] for p in neg_expression_profiles]
+    tab = "\t\t\t\t"
+    print(tab + tab + "Actual")
+    print(tab + tab + "Positive" + tab + "Negative")
+    print("Predicted Positive" + tab + str(tp) + tab + str(fp))
+    print("Predicted Negative" + tab + str(fn) + tab + str(tn))
 
-gauss_both = GMM(n_components=2, n_init=5, n_iter=1000)
-gauss_both.fit(pos_expression_intensity + neg_expression_intensity)
-coeffs = gauss_both.weights_
-mus = [x[0] for x in gauss_both.means_]
-sigmas = [x[0] for x in gauss_both.covars_]
+    '''
+    #testing using z peaks
+    mus = [x[0] for x in gauss_model.means_]
+    sigmas = [x[0] for x in gauss_model.covars_]
 
-print("Coeff:\t" + str(coeffs))
-print("Mus:\t" + str(mus))
-print("Sigmas:\t" + str(sigmas))
+    num_peaks = len(mus)
 
-samples = gauss_both.sample(100000)
-gaussian_sampling.plot_multidist("ERBB2", samples)
+    #2d matrix [a][b]
+    #a = classified into peak 'a' where 0 <= a < num_peaks
+    #b = classified a phenotype of b where b = 0 || 1
+    classified = [[0] * 2] * num_peaks
+    for i in range(0, len(x)):
+        #find lowest z score from corresponding peaks
+        #Todo: no magic values
+        lowestScore = -1
+        lowestPeak = -1
+        for p in range(0, len(mus)):
+            z = abs((x[i] - mus[p]) / (sigmas[p]))
+            if z < lowestScore or lowestScore == -1:
+                lowestScore = z
+                lowestPeak = p
 
+        classified[lowestPeak][Y[i]] += 1
 
-end = timeit.default_timer()
-print("\tDone! Took" + str(end - start) + "s")
+    for peak_num in range(0, num_peaks):
+        print("Peak #" + str(peak_num) + " class 0:" + str(classified[i][0]))
+        print("Peak #" + str(peak_num) + " class 1:" + str(classified[i][1]))
+    '''
+
+if __name__ == "__main__":
+    #first process data
+    clinical_profiles = []
+    for profile in read_dumped_data("BC_clinical_profiles.pkl"):
+        clinical_profiles.append(profile)
+    clinical_profiles.sort(key=lambda profile: profile.sample_num)
+
+    samples = []
+    for profile in read_dumped_data("BC_expression_profiles.pkl"):
+       samples.append(profile)
+
+    #extract training/testing data
+    gene = "ERBB2"
+    '''
+    ToDo: implement maping of num to profile and vice versa for that sexy linear time
+    '''
+    x = []
+    Y = []
+    for sample in samples:
+        sample_num = sample.sample_num
+
+        #extract the profile of interest
+        profiles = sample.profiles
+        gene_profile = ([p for p in profiles if p.gene == gene])[0]
+        x.append([gene_profile.intensity])
+
+        #check if patient has cancer
+        for i in range(0, len(clinical_profiles)):
+            if clinical_profiles[i].sample_num == sample_num:
+                if clinical_profiles[i].posnodes == 'y' or \
+                        clinical_profiles[i].event_meta == 1 or\
+                        clinical_profiles[i].st_gallen == 0:
+                    Y.append(1)
+                else:
+                    Y.append(0)
+                break
+
+    #train model
+    model = fit_test_model(x)
+    print_test_model(x, Y, model)
+    print_model_params(model)
+
 
 

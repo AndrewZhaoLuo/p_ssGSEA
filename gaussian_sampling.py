@@ -85,6 +85,12 @@ def plot_multidist(title, values):
     plotter.savefig(title)
     plotter.close()
 
+'''
+Gaussian model
+'''
+def plot_gauss_mix_model(gauss_model, title):
+    samples = gauss_model.sample(100000)
+    plot_multidist(title, samples)
 
 if __name__ == "__main__":
     #plot_sigma_samplesize(SAMPLE_NUMBERS, SIGMA, (24,24), "Single_Distribution_Test")
