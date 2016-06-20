@@ -21,11 +21,11 @@ sigma           =       standard deviation of the dist, must be positive
 
 returns an array of size num_samples containing points sampled from the dist.
 '''
-def sample_dist(num_sample, mu, sigma):
+def sample_dist(num_sample, mu, sigma, coeff):
     assert num_sample > 0
     assert sigma > 0
 
-    return [gauss(mu, sigma) for i in range(0, num_sample)]
+    return [gauss(mu, sigma) * coeff for i in range(0, num_sample)]
 
 '''
 Returns a set of points sampled from multiple gaussian dist!
@@ -36,13 +36,13 @@ will belong to one distribution
 
 returns all the sampling of all distributions as one list
 '''
-def sample_multi_dist(num_samples, mus, sigmas):
+def sample_multi_dist(num_samples, mus, sigmas, coeffs):
     assert len(num_samples) == len(mus)
     assert len(mus) == len(sigmas)
 
     samples = []
     for i in range(0, len(num_samples)):
-        samples += sample_dist(num_samples[i], mus[i], sigmas[i])
+        samples += sample_dist(num_samples[i], mus[i], sigmas[i], coeffs[i])
 
     return samples
 
@@ -70,14 +70,22 @@ plots graph of sampling from multiple distributions and exports it as a png
 
 see sample_multi_dist for instructions on parameters
 '''
-def plot_multidist(num_samples, mus, sigmas, title):
-    values = sample_multi_dist(num_samples, mus, sigmas)
+def plot_multidist(num_samples, mus, sigmas, coeffs, title, values):
+    values = sample_multi_dist(num_samples, mus, sigmas, coeffs)
     sea.distplot(values)
 
     plotter.title("SAMPLE=" + str(num_samples) + " MU=" + str(mus) + " SIGMA=" + str(sigmas))
     plotter.savefig(title)
     plotter.close()
 
+def plot_multidist(title, values):
+    sea.distplot(values)
+
+    plotter.title(title)
+    plotter.savefig(title)
+    plotter.close()
+
+
 if __name__ == "__main__":
     #plot_sigma_samplesize(SAMPLE_NUMBERS, SIGMA, (24,24), "Single_Distribution_Test")
-    plot_multidist([10000, 10000], [0, 0], [100, 500], "Double_Distribution_Test")
+    plot_multidist([10000, 10000], [0, 0], [100, 500], [1,1], "Double_Distribution_Test")
