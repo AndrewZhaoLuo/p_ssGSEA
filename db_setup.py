@@ -10,6 +10,7 @@ import pickle
 
 from process_BC_data import expression_profile
 from process_BC_data import clinical_data
+from process_BC_data import sample
 
 import timeit
 
@@ -63,15 +64,10 @@ def rebuild_BC_db(cursor):
 '''
 GETTING DATA FROM DATABASE CODE
 '''
-
-class sample:
-    def __init__(self, profiles, sample_num):
-        self.profiles = profiles
-        self.sample_num = sample_num
 '''
 Creates sample containing all probes linked to a gene and dumps the array of samples into a pickle
 '''
-def get_expression_profiles(file, query):
+def dump_expression_profiles(file, query):
     connection = sqlite3.connect("GeneExpression.db")
     cursor = connection.cursor()
 
@@ -100,7 +96,7 @@ def get_expression_profiles(file, query):
 '''
 Downloads clinical profiles and dumps the array of them into a pickle
 '''
-def get_clinical_profiles(file, query):
+def dump_clinical_profiles(file, query):
     connection = sqlite3.connect("GeneExpression.db")
     cursor = connection.cursor()
 
@@ -120,11 +116,12 @@ def get_clinical_profiles(file, query):
 
     pickle.dump(profiles, open(file, 'wb'))
 
+def read_dumped_data(file):
+    return pickle.load(open(file, 'rb'))
+
 if __name__ == "__main__":
     connection = sqlite3.connect("GeneExpression.db")
-
     cursor = connection.cursor()
     #rebuild_BC_db(cursor)
-
     connection.commit()
 

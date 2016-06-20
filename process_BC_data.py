@@ -75,6 +75,12 @@ class clinical_data:
         self.c1_cross_valid = c1_cross_valid
         self.c1_used = c1_used
 
+
+class sample:
+    def __init__(self, profiles, sample_num):
+        self.profiles = profiles
+        self.sample_num = sample_num
+
 '''
 Given a file containing expression profiles, a list of expression_profiles based on the data
 See /Data/HybridSets/BC/ExpressionProfiles for the format of data
