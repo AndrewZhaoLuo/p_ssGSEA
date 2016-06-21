@@ -146,6 +146,7 @@ if __name__ == "__main__":
     model = fit_test_model(x)
     print_test_model(x, Y, model)
     print_model_params(model)
+    
 
 
 
