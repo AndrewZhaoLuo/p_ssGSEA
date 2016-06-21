@@ -67,10 +67,7 @@ GETTING DATA FROM DATABASE CODE
 '''
 Creates sample containing all probes linked to a gene and dumps the array of samples into a pickle
 '''
-def dump_expression_profiles(file, query):
-    connection = sqlite3.connect("GeneExpression.db")
-    cursor = connection.cursor()
-
+def dump_expression_profiles(file, query, cursor):
     #first get a list of all the unique ids
     cursor.execute("Select Distinct Sample From BC_GeneExpression")
     rows = cursor.fetchall()
@@ -96,10 +93,7 @@ def dump_expression_profiles(file, query):
 '''
 Downloads clinical profiles and dumps the array of them into a pickle
 '''
-def dump_clinical_profiles(file, query):
-    connection = sqlite3.connect("GeneExpression.db")
-    cursor = connection.cursor()
-
+def dump_clinical_profiles(file, query, cursor):
     #cursor.execute("Select * From BC_ClinicalData")
     cursor.execute(query)
     rows = cursor.fetchall()
@@ -122,6 +116,8 @@ def read_dumped_data(file):
 if __name__ == "__main__":
     connection = sqlite3.connect("GeneExpression.db")
     cursor = connection.cursor()
-    #rebuild_BC_db(cursor)
+
+
+
     connection.commit()
 
