@@ -140,16 +140,27 @@ def filter_sample_profile_to_gene(file):
     samples = []
     for profile in read_dumped_data("BC_expression_profiles.pkl"):
         samples.append(profile)
-        profile.profiles.sort(key=lambda expression: expression.gene)
 
     genes = []
     num_genes = len(samples[0].profiles)
     for i in range(0, num_genes):
         gene_name = samples[0].profiles[i].gene
         intensities = []
+        sample_nums = []
         for person in samples:
             intensities.append(person.profiles[i].intensity)
-        genes.append(gene_profile(intensities, gene_name))
+            sample_nums.append(person.sample_num)
+            #if gene_name == "ERBB2":
+            #    print(person.profiles[i].gene)
+            #    print("\t" + str(person.profiles[i].intensity))
+            #print([x.gene for x in person.profiles])
+        genes.append(gene_profile(intensities, sample_nums, gene_name))
+
+    check_length = len(genes[0].intensities)
+
+    #check this method works
+    for gene in genes:
+        assert check_length == len(gene.intensities)
 
     pickle.dump(genes, open(file, 'wb'))
 

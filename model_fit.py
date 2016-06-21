@@ -77,6 +77,20 @@ def print_test_model(x, Y, gauss_model):
     print("Predicted Negative" + tab + str(fn) + tab + str(tn))
 
 if __name__ == "__main__":
+    genes = []
+    for gene_sample in read_dumped_data("BC_gene_profiles.pkl"):
+        genes.append(gene_sample)
+
+    for gene in genes:
+        if gene.name == "ERBB2":
+            intensities = [[x] for x in gene.intensities]
+            print(intensities)
+            model = fit_test_model(intensities)
+            #print_test_model(x, Y, model)
+            print_model_params(model)
+
+    #future list inc
+    '''
     #first process data
     clinical_profiles = []
     for profile in read_dumped_data("BC_clinical_profiles.pkl"):
@@ -89,9 +103,9 @@ if __name__ == "__main__":
 
     #extract training/testing data
     gene = "ERBB2"
-    '''
-    ToDo: implement maping of num to profile and vice versa for that sexy linear time
-    '''
+
+    #ToDo: implement maping of num to profile and vice versa for that sexy linear time
+
     x = []
     Y = []
     for sample in samples:
@@ -117,7 +131,7 @@ if __name__ == "__main__":
     model = fit_test_model(x)
     print_test_model(x, Y, model)
     print_model_params(model)
-    
+    '''
 
 
 
