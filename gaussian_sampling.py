@@ -25,7 +25,7 @@ def sample_dist(num_sample, mu, sigma, coeff):
     assert num_sample > 0
     assert sigma > 0
 
-    return [gauss(mu, sigma) * coeff for i in range(0, num_sample)]
+    return [gauss(mu, sigma)for i in range(0, int(num_sample * coeff))]
 
 '''
 Returns a set of points sampled from multiple gaussian dist!
@@ -70,7 +70,7 @@ plots graph of sampling from multiple distributions and exports it as a png
 
 see sample_multi_dist for instructions on parameters
 '''
-def plot_multidist(num_samples, mus, sigmas, coeffs, title, values):
+def plot_multidist(num_samples, mus, sigmas, coeffs, title):
     values = sample_multi_dist(num_samples, mus, sigmas, coeffs)
     sea.distplot(values)
 
@@ -78,7 +78,7 @@ def plot_multidist(num_samples, mus, sigmas, coeffs, title, values):
     plotter.savefig(title)
     plotter.close()
 
-def plot_multidist(title, values):
+def plot_multidist_from_values(title, values):
     sea.distplot(values)
 
     plotter.title(title)
@@ -90,7 +90,7 @@ Gaussian model
 '''
 def plot_gauss_mix_model(gauss_model, title):
     samples = gauss_model.sample(100000)
-    plot_multidist(title, samples)
+    plot_multidist_from_values(title, samples)
 
 if __name__ == "__main__":
     #plot_sigma_samplesize(SAMPLE_NUMBERS, SIGMA, (24,24), "Single_Distribution_Test")

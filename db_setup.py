@@ -1,5 +1,5 @@
 '''
-This is a simple series of script which
+This is a simple series of script which sets up and retrieves information from the database
 
 IN GENERAL THIS MESSES WITH THE DB SCHEMA, DONT MESS WITH UNLESS YOU KNOW WHAT YOU ARE DOING!!!
 '''
@@ -150,10 +150,6 @@ def filter_sample_profile_to_gene(file):
         for person in samples:
             intensities.append(person.profiles[i].intensity)
             sample_nums.append(person.sample_num)
-            #if gene_name == "ERBB2":
-            #    print(person.profiles[i].gene)
-            #    print("\t" + str(person.profiles[i].intensity))
-            #print([x.gene for x in person.profiles])
         genes.append(gene_profile(intensities, sample_nums, gene_name))
 
     check_length = len(genes[0].intensities)
@@ -163,7 +159,9 @@ def filter_sample_profile_to_gene(file):
         assert check_length == len(gene.intensities)
 
     pickle.dump(genes, open(file, 'wb'))
-
+'''
+ToDo: remove this file
+'''
 def read_dumped_data(file):
     return pickle.load(open(file, 'rb'))
 

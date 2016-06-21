@@ -1,7 +1,8 @@
 '''
-This file contains methods for importing and pre-processing the sample data found in /Data/BC
+BC =  breast cancer data set
 
-This is the breast cancer data set
+This file contains methods for importing and pre-processing the data from the BC data set used in the
+paper
 '''
 
 import os
@@ -75,12 +76,17 @@ class clinical_data:
         self.c1_cross_valid = c1_cross_valid
         self.c1_used = c1_used
 
-
+'''
+A patient with a collection of all his/her gene expression profiles
+'''
 class sample:
     def __init__(self, profiles, sample_num):
         self.profiles = profiles
         self.sample_num = sample_num
 
+'''
+The collection of all intensities for one gene
+'''
 class gene_profile:
     def __init__(self, intensities, sample_num, name):
         self.intensities = intensities
@@ -89,8 +95,9 @@ class gene_profile:
 
 '''
 Given a file containing expression profiles, a list of expression_profiles based on the data
-See /Data/HybridSets/BC/ExpressionProfiles for the format of data
-Assumes UTF7 encoding
+This assumes the gene expression profile format from the 295 sample study in the BC set.
+
+Assumes UTF7 encoding (fuck me for not checking)
 '''
 def readExpressionProfile(file_name):
     file = open(file_name, 'r', encoding="utf-7")
@@ -153,7 +160,7 @@ def readExpressionProfile(file_name):
     return expression_profiles
 
 '''
-Assumes all text files in dir are .txt files formatted as per what BC_DATA_DIR/ExpressionProfiles/README says
+This assumes the gene expression profile format from the 295 sample study in the BC set.
 
 dir     =       the directory containing the .txt files containing expression profiles
 
@@ -169,7 +176,8 @@ def getExpressionProfiles(dir):
 
 '''
 Given a file containing clinical data, return a list of expression_profiles based on the data
-See /Data/HybridSets/BC/ClinicalData for the format of data
+
+This assumes the clinical profile format from the 295 sample study in the BC set.
 '''
 def getClinicalData(file_name):
     file = open(file_name, 'r', encoding="utf-7")

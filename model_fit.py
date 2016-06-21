@@ -1,5 +1,5 @@
 '''
-Contains methods to fit genes to gaussian model as per the paper
+Contains methods to fit gene expression to mixed gaussian model as per the paper
 '''
 
 import timeit
@@ -11,6 +11,7 @@ from db_setup import read_dumped_data
 from sklearn.mixture import GMM
 
 import gaussian_sampling
+import pickle
 
 #for pickle formatting
 from process_BC_data import sample
@@ -76,62 +77,38 @@ def print_test_model(x, Y, gauss_model):
     print("Predicted Positive" + tab + str(tp) + tab + str(fp))
     print("Predicted Negative" + tab + str(fn) + tab + str(tn))
 
-if __name__ == "__main__":
+'''
+Dumps dictionary key : value where key = gene name, value = bayesian mixed model with 2 peaks
+'''
+def dump_trained_models(file):
+    print("Training model for every gene...")
     genes = []
     for gene_sample in read_dumped_data("BC_gene_profiles.pkl"):
         genes.append(gene_sample)
 
-    for gene in genes:
-        if gene.name == "ERBB2":
-            intensities = [[x] for x in gene.intensities]
-            print(intensities)
-            model = fit_test_model(intensities)
-            #print_test_model(x, Y, model)
-            print_model_params(model)
+    i = 0
+    models = {}
+    for i in range(0, len(genes)):
+        gene = genes[i]
+        intensities = [[x] for x in gene.intensities]
+        model = fit_test_model(intensities)
 
-    #future list inc
-    '''
-    #first process data
-    clinical_profiles = []
-    for profile in read_dumped_data("BC_clinical_profiles.pkl"):
-        clinical_profiles.append(profile)
-    clinical_profiles.sort(key=lambda profile: profile.sample_num)
+        models[gene.name] = model
+        i += 1
+        if i % 100 == 0:
+            print("Finished model #" + str(i))
 
-    samples = []
-    for profile in read_dumped_data("BC_expression_profiles.pkl"):
-       samples.append(profile)
+    pickle.dump(models, open(file, 'wb'))
 
-    #extract training/testing data
-    gene = "ERBB2"
+if __name__ == "__main__":
+    dict = pickle.load(open("BC_trained_models.pkl", 'rb'))
 
-    #ToDo: implement maping of num to profile and vice versa for that sexy linear time
+    gauss_model = dict["ERBB2"]
+    coeffs = gauss_model.weights_
+    mus = [x[0] for x in gauss_model.means_]
+    sigmas = [x[0] for x in gauss_model.covars_]
 
-    x = []
-    Y = []
-    for sample in samples:
-        sample_num = sample.sample_num
+    num_samples = [10000, 10000]
+    gaussian_sampling.plot_multidist(num_samples, mus, sigmas, coeffs, "Combined.png")
 
-        #extract the profile of interest
-        profiles = sample.profiles
-        gene_profile = ([p for p in profiles if p.gene == gene])[0]
-        x.append([gene_profile.intensity])
-
-        #check if patient has cancer
-        for i in range(0, len(clinical_profiles)):
-            if clinical_profiles[i].sample_num == sample_num:
-                if clinical_profiles[i].posnodes == 'y' or \
-                        clinical_profiles[i].event_meta == 1 or\
-                        clinical_profiles[i].st_gallen == 0:
-                    Y.append(1)
-                else:
-                    Y.append(0)
-                break
-
-    #train model
-    model = fit_test_model(x)
-    print_test_model(x, Y, model)
-    print_model_params(model)
-    '''
-
-
-
+    #def plot_multidist(num_samples, mus, sigmas, coeffs, title, values):
