@@ -81,7 +81,7 @@ class sample:
         self.profiles = profiles
         self.sample_num = sample_num
 
-class gene:
+class gene_profile:
     def __init__(self, intensities, name):
         self.intensities = intensities
         self.name = name

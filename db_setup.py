@@ -11,7 +11,7 @@ import pickle
 from process_BC_data import expression_profile
 from process_BC_data import clinical_data
 from process_BC_data import sample
-from process_BC_data import gene
+from process_BC_data import gene_profile
 
 import timeit
 
@@ -107,13 +107,10 @@ def dump_gene_profiles(file, cursor):
         intensities_rows = cursor.fetchall()
 
         #importing negatives seems to append
-        intensities = []
-        for row in intensities_rows:
-            r = str(row[0]).replace("+AC0", "")
-            intensities.append(float(r))
         #intensities = [row[0] for row in intensities_rows]
-        #print(gene_name + " " + str(intensities))
-        genes.append(gene(gene_name, intensities))
+        #intensities = [row[0] for row in intensities_rows]
+        print(gene_name + " " + str(intensities_rows))
+        #genes.append(gene(gene_name, intensities))
 
     pickle.dump(genes, open(file, 'wb'))
 
@@ -136,6 +133,26 @@ def dump_clinical_profiles(file, cursor):
 
     pickle.dump(profiles, open(file, 'wb'))
 
+'''
+Given a pickle of samples, dumps into gene_sample form
+'''
+def filter_sample_profile_to_gene(file):
+    samples = []
+    for profile in read_dumped_data("BC_expression_profiles.pkl"):
+        samples.append(profile)
+        profile.profiles.sort(key=lambda expression: expression.gene)
+
+    genes = []
+    num_genes = len(samples[0].profiles)
+    for i in range(0, num_genes):
+        gene_name = samples[0].profiles[i].gene
+        intensities = []
+        for person in samples:
+            intensities.append(person.profiles[i].intensity)
+        genes.append(gene_profile(intensities, gene_name))
+
+    pickle.dump(genes, open(file, 'wb'))
+
 def read_dumped_data(file):
     return pickle.load(open(file, 'rb'))
 
@@ -143,8 +160,7 @@ if __name__ == "__main__":
     connection = sqlite3.connect("GeneExpression.db")
     cursor = connection.cursor()
 
-    rebuild_BC_db(cursor)
-    #dump_gene_profiles("BC_gene_profiles.pkl", cursor)
+    filter_sample_profile_to_gene("BC_gene_profiles.pkl")
 
     connection.commit()
 
