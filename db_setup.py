@@ -11,6 +11,7 @@ import pickle
 from process_BC_data import expression_profile
 from process_BC_data import clinical_data
 from process_BC_data import sample
+from process_BC_data import gene
 
 import timeit
 
@@ -67,7 +68,7 @@ GETTING DATA FROM DATABASE CODE
 '''
 Creates sample containing all probes linked to a gene and dumps the array of samples into a pickle
 '''
-def dump_expression_profiles(file, query, cursor):
+def dump_expression_profiles(file, cursor):
     #first get a list of all the unique ids
     cursor.execute("Select Distinct Sample From BC_GeneExpression")
     rows = cursor.fetchall()
@@ -76,8 +77,8 @@ def dump_expression_profiles(file, query, cursor):
     samples = []
     for num in sample_nums:
         #get all gene profiles from each profile
-        #cursor.execute("Select * From BC_GeneExpression WHERE Sample='%s' AND Gene != ''" % num)
-        cursor.execute(query)
+        cursor.execute("Select * From BC_GeneExpression WHERE Sample='%s' AND Gene != ''" % num)
+        #cursor.execute(query)
         sample_profiles = cursor.fetchall()
 
         profiles = []
@@ -91,11 +92,36 @@ def dump_expression_profiles(file, query, cursor):
     pickle.dump(samples, open(file, 'wb'))
 
 '''
+Dump gene containing all probes linked to a gene and dumps the array of samples into a pickle
+'''
+def dump_gene_profiles(file, cursor):
+    #first get a list of all the unique ids
+    cursor.execute("Select Distinct Gene From BC_GeneExpression")
+    rows = cursor.fetchall()
+    gene_names = [row[0] for row in rows]
+
+    genes = []
+    for gene_name in gene_names:
+        #get all gene intensities for each gene
+        cursor.execute("Select Intensity From BC_GeneExpression WHERE Gene= '%s'" % gene_name)
+        intensities_rows = cursor.fetchall()
+
+        #importing negatives seems to append
+        intensities = []
+        for row in intensities_rows:
+            r = str(row[0]).replace("+AC0", "")
+            intensities.append(float(r))
+        #intensities = [row[0] for row in intensities_rows]
+        #print(gene_name + " " + str(intensities))
+        genes.append(gene(gene_name, intensities))
+
+    pickle.dump(genes, open(file, 'wb'))
+
+'''
 Downloads clinical profiles and dumps the array of them into a pickle
 '''
-def dump_clinical_profiles(file, query, cursor):
-    #cursor.execute("Select * From BC_ClinicalData")
-    cursor.execute(query)
+def dump_clinical_profiles(file, cursor):
+    cursor.execute("Select * From BC_ClinicalData")
     rows = cursor.fetchall()
 
     profiles = []
@@ -117,7 +143,8 @@ if __name__ == "__main__":
     connection = sqlite3.connect("GeneExpression.db")
     cursor = connection.cursor()
 
-
+    rebuild_BC_db(cursor)
+    #dump_gene_profiles("BC_gene_profiles.pkl", cursor)
 
     connection.commit()
 

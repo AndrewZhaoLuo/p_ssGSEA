@@ -81,12 +81,18 @@ class sample:
         self.profiles = profiles
         self.sample_num = sample_num
 
+class gene:
+    def __init__(self, intensities, name):
+        self.intensities = intensities
+        self.name = name
+
 '''
 Given a file containing expression profiles, a list of expression_profiles based on the data
 See /Data/HybridSets/BC/ExpressionProfiles for the format of data
+Assumes UTF7 encoding
 '''
 def readExpressionProfile(file_name):
-    file = open(file_name, 'r')
+    file = open(file_name, 'r', encoding="utf-7")
 
     #get rows of the file
     rows = file.read().split("\n")
@@ -165,7 +171,7 @@ Given a file containing clinical data, return a list of expression_profiles base
 See /Data/HybridSets/BC/ClinicalData for the format of data
 '''
 def getClinicalData(file_name):
-    file = open(file_name, 'r')
+    file = open(file_name, 'r', encoding="utf-7")
 
     clinical_datas = []
     rows = file.read().split('\n')

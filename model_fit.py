@@ -76,35 +76,6 @@ def print_test_model(x, Y, gauss_model):
     print("Predicted Positive" + tab + str(tp) + tab + str(fp))
     print("Predicted Negative" + tab + str(fn) + tab + str(tn))
 
-    '''
-    #testing using z peaks
-    mus = [x[0] for x in gauss_model.means_]
-    sigmas = [x[0] for x in gauss_model.covars_]
-
-    num_peaks = len(mus)
-
-    #2d matrix [a][b]
-    #a = classified into peak 'a' where 0 <= a < num_peaks
-    #b = classified a phenotype of b where b = 0 || 1
-    classified = [[0] * 2] * num_peaks
-    for i in range(0, len(x)):
-        #find lowest z score from corresponding peaks
-        #Todo: no magic values
-        lowestScore = -1
-        lowestPeak = -1
-        for p in range(0, len(mus)):
-            z = abs((x[i] - mus[p]) / (sigmas[p]))
-            if z < lowestScore or lowestScore == -1:
-                lowestScore = z
-                lowestPeak = p
-
-        classified[lowestPeak][Y[i]] += 1
-
-    for peak_num in range(0, num_peaks):
-        print("Peak #" + str(peak_num) + " class 0:" + str(classified[i][0]))
-        print("Peak #" + str(peak_num) + " class 1:" + str(classified[i][1]))
-    '''
-
 if __name__ == "__main__":
     #first process data
     clinical_profiles = []
