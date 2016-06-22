@@ -18,18 +18,33 @@ import timeit
 '''
 DATABASE CODE
 '''
-def create_BC_schema(cursor):
+#Schema
+def create_BC_schema_expression(cursor):
     cursor.execute('''CREATE TABLE BC_GeneExpression
         (Sample int, Substance text, Gene text, Log_Ratio real,
          Log_Ratio_Error real, p_Value real, Intensity real, Flag int)''')
 
+def create_BC_schema_clinical(cursor):
     cursor.execute('''CREATE TABLE BC_ClinicalData
         (Sample int, FirstSeriesID int, Posnodes text, EventMeta int,
         EventDeath int, TimeSurvival real, TimeRecur real, TimeMeta real, ESR1 int,
         NIH int, StGallen int, Conserv int, C1FromData real, C1CrossValid real,
         C1Used real)''')
 
-def load_BC_data(cursor):
+def create_BC_schema_sets(cursor):
+    cursor.execute('''CREATE TABLE BC_GeneSet_URL
+        (GeneSet text, URL text)''')
+
+    cursor.execute('''CREATE TABLE BC_GeneSet_Genes
+        (GeneSet text, Gene text)''')
+
+def create_BC_schema_all(cursor):
+    create_BC_schema_expression(cursor)
+    create_BC_schema_clinical(cursor)
+    create_BC_schema_sets(cursor)
+
+#data loading
+def load_BC_data_expression(cursor):
     gene_profiles = BC.getExpressionProfiles(BC.BC_EXPRESSION_DIR)
     for profile in gene_profiles:
         cursor.execute("INSERT INTO BC_GeneExpression VALUES(?,?,?,?,?,?,?,?)",
@@ -37,6 +52,7 @@ def load_BC_data(cursor):
                         profile.log_ratio, profile.log_error, profile.p_value,
                         profile.intensity, profile.flag))
 
+def load_BC_data_clinical(cursor):
     clinical_profiles = BC.getClinicalData(BC.BC_CLINICAL_DATA_FILE)
     for profile in clinical_profiles:
         cursor.execute("INSERT INTO BC_ClinicalData VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -45,6 +61,24 @@ def load_BC_data(cursor):
                         profile.esr1, profile.nih, profile.st_gallen, profile.conserv,
                         profile.c1_from_data, profile.c1_cross_valid, profile.c1_used))
 
+def load_BC_data_sets(cursor):
+    gene_sets = BC.getGeneSetData(BC.BC_GENE_SETS_FILE)
+    for set in gene_sets:
+        set_name = set.set_name
+        set_url = set.url
+        cursor.execute("INSERT INTO BC_GeneSet_URL VALUES(?,?)",
+                       (set_name, set_url))
+
+        genes = set.genes
+        for gene in genes:
+            cursor.execute("INSERT INTO BC_GeneSet_Genes VALUES(?,?)",
+                           (set_name, gene))
+
+def load_BC_data_all(cursor):
+    load_BC_data_expression(cursor)
+    load_BC_data_clinical(cursor)
+    load_BC_data_sets(cursor)
+
 '''
 Tears down and rebuild BC database (PLEASE DON'T CALL UNLESS YOU KNOW WHAT YOU ARE DOING!!!!!)
 '''
@@ -52,11 +86,13 @@ def rebuild_BC_db(cursor):
     print("Rebuilding BC database...")
     start = timeit.default_timer()
 
-    cursor.execute("DROP TABLE IF EXISTS BC_GeneExpression")
-    cursor.execute("DROP TABLE IF EXISTS BC_ClinicalData")
+    #cursor.execute("DROP TABLE IF EXISTS BC_GeneExpression")
+    #cursor.execute("DROP TABLE IF EXISTS BC_ClinicalData")
+    #cursor.execute("DROP TABLE IF EXISTS BC_GeneSet_URL")
+    #cursor.execute("DROP TABLE IF EXISTS BC_GeneSet_Genes")
 
-    create_BC_schema(cursor)
-    load_BC_data(cursor)
+    create_BC_schema_all(cursor)
+    load_BC_data_all(cursor)
 
     end = timeit.default_timer()
     print("Finished building DB! Took " + str(end - start) + "s")
@@ -169,7 +205,8 @@ if __name__ == "__main__":
     connection = sqlite3.connect("GeneExpression.db")
     cursor = connection.cursor()
 
-    filter_sample_profile_to_gene("BC_gene_profiles.pkl")
+    create_BC_schema_sets(cursor)
+    load_BC_data_sets(cursor)
 
     connection.commit()
 

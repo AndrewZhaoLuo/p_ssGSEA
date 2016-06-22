@@ -59,6 +59,8 @@ if __name__ == "__main__":
     gene_profiles = pickle.load(open("BC_trained_models.pkl", 'rb'))
 
     gene_names = gene_profiles.keys()
+    '''
     for name in gene_names:
         if name == "ERBB2":
             print(calculate_bayes_error(gene_profiles[name]))
+    '''

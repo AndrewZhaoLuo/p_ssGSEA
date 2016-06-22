@@ -6,6 +6,10 @@ BC:
 http://bioinformatics.nki.nl/data/ (main site)
 http://bioinformatics.nki.nl/data/ZipFiles295Samples.zip (file)
 
+GeneSets(BC)
+http://software.broadinstitute.org/gsea/downloads.jsp
+Download the gene symbol sets. All curated gene sets!
+
 LC:
 FTP:
 ftp://caftpd.nci.nih.gov/pub/caARRAY/experiments/caArray_jacob-00182/

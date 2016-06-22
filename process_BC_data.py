@@ -12,6 +12,7 @@ BC_DATA_DIR = os.getcwd() + "/Data/HybridSets/BC"
 
 BC_EXPRESSION_DIR = BC_DATA_DIR + "/ExpressionProfiles"
 BC_CLINICAL_DATA_FILE = BC_DATA_DIR + "/ClinicalData/ClinicalData.txt"
+BC_GENE_SETS_FILE = BC_DATA_DIR + "/GeneSets/c2.all.v5.1.symbols.gmt"
 
 '''
 Parameters:
@@ -77,6 +78,19 @@ class clinical_data:
         self.c1_used = c1_used
 
 '''
+A collection of genes
+
+set_name = name of the pathway assoc
+url      = broad institute link to pathway info
+genes    = list-like strings
+'''
+class gene_set:
+    def __init__(self, set_name, url, genes):
+        self.set_name = set_name
+        self.url = url
+        self.genes = genes
+
+'''
 A patient with a collection of all his/her gene expression profiles
 '''
 class sample:
@@ -139,12 +153,12 @@ def readExpressionProfile(file_name):
         #start from two, which is the index of the first column with actual information
         #5 fields, so offset by 5 with each id
         for f in range(0, len(IDs)):
-            sample_num = IDs[f]
-            log_ratio = fields[2 + 5 * f + 0]
-            log_error = fields[2 + 5 * f + 1]
-            p_value = fields[2 + 5 * f + 2]
-            intensity = fields[2 + 5 * f + 3]
-            flag = fields[2 + 5 * f + 4]
+            sample_num  = IDs[f]
+            log_ratio   = fields[2 + 5 * f + 0]
+            log_error   = fields[2 + 5 * f + 1]
+            p_value     = fields[2 + 5 * f + 2]
+            intensity   = fields[2 + 5 * f + 3]
+            flag        = fields[2 + 5 * f + 4]
 
             profile = expression_profile(sample_num=sample_num,
                                          substance=substance,
@@ -213,3 +227,29 @@ def getClinicalData(file_name):
         clinical_datas.append(data)
 
     return clinical_datas
+
+'''
+Reads a file containing gene set data, one set per line, tab seperated where index 0 is the name
+of the pathway, index 1 is the url for pathway info, and the rest the name of the genes
+'''
+def getGeneSetData(file_name):
+    file = open(file_name, 'r', encoding="utf-7")
+
+    gene_sets = []
+    rows = file.read().split('\n')
+
+    for row in rows:
+        if(row == ''):
+            break
+
+        set_info = row.split("\t")
+        set_name = set_info[0]
+        set_url = set_info[1]
+
+        genes = []
+        for i in range(2, len(set_info)):
+            genes.append(set_info[i])
+
+        gene_sets.append(gene_set(set_name,set_url, genes))
+
+    return gene_sets
