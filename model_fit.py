@@ -17,6 +17,7 @@ import pickle
 from process_BC_data import sample
 from process_BC_data import expression_profile
 from process_BC_data import clinical_data
+from process_BC_data import gene_set
 
 '''
 x should data points of the intensity of the gene in question
@@ -41,7 +42,7 @@ Given a gauss mix model, prints parameters for each seperate peak
 def print_model_params(gauss_model):
     coeffs = gauss_model.weights_
     mus = [x[0] for x in gauss_model.means_]
-    covar = [x[0] for x in gauss_model.covars_]
+    sigmas = [x[0] ** 0.5 for x in gauss_model.covars_]
 
     string = ("Gaussian model: " + str(gauss_model)) + '\n'
     string += ("Coeff:\t" + str(coeffs)) + '\n'
@@ -102,14 +103,4 @@ def dump_trained_models(file):
     pickle.dump(models, open(file, 'wb'))
 
 if __name__ == "__main__":
-    dict = pickle.load(open("BC_trained_models.pkl", 'rb'))
-
-    gauss_model = dict["ERBB2"]
-    coeffs = gauss_model.weights_
-    mus = [x[0] for x in gauss_model.means_]
-    sigmas = [x[0] ** 0.5 for x in gauss_model.covars_]
-
-    #num_samples = [10000, 10000]
-    #gaussian_sampling.plot_multidist(num_samples, mus, sigmas, coeffs, "Combined.png")
-
-    #def plot_multidist(num_samples, mus, sigmas, coeffs, title, values):
+    gene_models = pickle.load(open("BC_trained_models.pkl", 'rb'))

@@ -12,6 +12,7 @@ from process_BC_data import expression_profile
 from process_BC_data import clinical_data
 from process_BC_data import sample
 from process_BC_data import gene_profile
+from process_BC_data import gene_set
 
 import timeit
 
@@ -101,6 +102,9 @@ def rebuild_BC_db(cursor):
 '''
 GETTING DATA FROM DATABASE CODE
 '''
+
+#ToDo: deprecate this - go to a model where method can get array of all types, seperate dump methods man
+
 '''
 Creates sample containing all probes linked to a gene and dumps the array of samples into a pickle
 '''
@@ -168,6 +172,17 @@ def dump_clinical_profiles(file, cursor):
                                       c1_from_data, c1_cross_valid, c1_used))
 
     pickle.dump(profiles, open(file, 'wb'))
+
+'''
+Downloads gene set and dumps the array of them into a pickle
+'''
+def dump_clinical_profiles(file, cursor):
+    cursor.execute("Select * FROM BC_GeneSet_URL")
+    rows = cursor.fetchall()
+
+    sets = []
+
+    pickle.dump(sets, open(file, 'wb'))
 
 '''
 Given a pickle of samples, dumps into gene_sample form

@@ -4,6 +4,8 @@ a "master gene"
 '''
 
 import pickle
+import sqlite3
+from process_BC_data import gene_set
 from process_BC_data import gene_profile
 from random import gauss
 
@@ -16,9 +18,6 @@ def calculate_prior(model):
 
     return min(coeffs[0], 1- coeffs[0])
 
-'''
-ToDo
-'''
 def calculate_bayes_error(model):
     NUM_TESTS = 1000000
     mus = [x[0] for x in model.means_]
@@ -55,12 +54,15 @@ def calculate_shape_balance(model):
 
     return max(sigmas[1] / sigmas[0], sigmas[0] / sigmas[1])
 
+def calculate_popularity(model, name):
+    connection = sqlite3.connect("GeneExpression.db")
+    cursor = connection.cursor()
+    cursor.execute("Select GeneSet From BC_GeneSet_Genes WHERE Gene='%s'" % name)
+
+    return len(cursor.fetchall())
+
 if __name__ == "__main__":
+    gene_sets = pickle.load(open("BC_gene_sets.pkl",'rb'))
     gene_profiles = pickle.load(open("BC_trained_models.pkl", 'rb'))
 
     gene_names = gene_profiles.keys()
-    '''
-    for name in gene_names:
-        if name == "ERBB2":
-            print(calculate_bayes_error(gene_profiles[name]))
-    '''

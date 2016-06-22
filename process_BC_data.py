@@ -253,3 +253,6 @@ def getGeneSetData(file_name):
         gene_sets.append(gene_set(set_name,set_url, genes))
 
     return gene_sets
+
+if __name__ == "__main__":
+    getGeneSetData(BC_GENE_SETS_FILE)
