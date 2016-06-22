@@ -3,12 +3,14 @@ This file contains a series of scripts for evaluating gene models and determinin
 a "master gene"
 '''
 
+import timeit
 import pickle
 import sqlite3
 from process_BC_data import gene_set
 from process_BC_data import gene_profile
 from random import gauss
 
+import heapq
 
 '''
 returns the π measure as per the paper
@@ -17,9 +19,13 @@ def calculate_prior(model):
     coeffs = model.weights_
 
     return min(coeffs[0], 1- coeffs[0])
+'''
+Todo: use an analytical method
 
+Unsure variance in sampling method
+'''
 def calculate_bayes_error(model):
-    NUM_TESTS = 1000000
+    NUM_TESTS = 10000
     mus = [x[0] for x in model.means_]
     sigmas = [x[0] ** 0.5 for x in model.covars_]
 
@@ -54,15 +60,70 @@ def calculate_shape_balance(model):
 
     return max(sigmas[1] / sigmas[0], sigmas[0] / sigmas[1])
 
-def calculate_popularity(model, name):
+def calculate_popularity(name):
     connection = sqlite3.connect("GeneExpression.db")
     cursor = connection.cursor()
     cursor.execute("Select GeneSet From BC_GeneSet_Genes WHERE Gene='%s'" % name)
 
     return len(cursor.fetchall())
 
+'''
+Model is valid if prior >= 0.1, non-zero popularity.
+Then divide priors of [0.1, 0.5] into 10 bins for each bin take the best (lowest bayes error) 10
+genes for each bin and dump
+
+ToDo: rewrite to be reusuable
+'''
+def dump_best_models(gene_profiles):
+    bin_bounds = [0.1] + [0.1 + x * (0.5 - 0.1) / 10 for x in range(1, 11)]
+    find_bin = lambda prior: 9 if prior == 0.5 \
+                                else sum([i for i in range(0, len(bin_bounds) - 1)
+                                  if (prior >= bin_bounds[i] and prior < bin_bounds[i + 1])])
+    bins = [{} for x in range(0, 10)]
+
+    start = timeit.default_timer()
+
+    #Here we check every gene fits the criteria and then add it to appropriate bin
+    #bins are maps k : v where k = gene name v = bayes error
+    i = 0
+    gene_names = gene_profiles.keys()
+    for gene in gene_names:
+        model = gene_profiles[gene]
+
+        popularity = calculate_popularity(gene)
+        prior = calculate_prior(model)
+        error = calculate_bayes_error(model)
+
+        #pick and get all gene errors
+        if popularity > 0 and prior >= 0.1:
+            bin = find_bin(prior)
+            bins[bin][gene] = error
+
+        i += 1
+        if i % 100 == 0:
+            print("Completed classifying " + str(i) + " genes\t" + str(timeit.default_timer() - start) +"s")
+            start = timeit.default_timer()
+
+    #then we go through each bin and take the 10 smallest bayes error
+    #bestmodels is k: v where k = gene name and v = bayes error for that model
+    best_models = {}
+    for bin in bins:
+        best_genes = heapq.nsmallest(10, bin, key=bin.get)
+        for gene in best_genes:
+            best_models[gene] = bin[gene]
+
+    pickle.dump(best_models, open("BC_master_genes", 'wb'))
+
+
 if __name__ == "__main__":
-    gene_sets = pickle.load(open("BC_gene_sets.pkl",'rb'))
+    print("Loading data set")
+    #gene_sets = pickle.load(open("BC_gene_sets.pkl",'rb'))
     gene_profiles = pickle.load(open("BC_trained_models.pkl", 'rb'))
 
-    gene_names = gene_profiles.keys()
+    print("Examining genes...")
+
+    start = timeit.default_timer()
+    dump_best_models(gene_profiles)
+    end = timeit.default_timer()
+
+    print("DONE! Took " + str(end - start) + "s")
