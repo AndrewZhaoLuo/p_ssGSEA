@@ -30,7 +30,7 @@ no test/train split since this is a clustering model
 returns the trained model
 '''
 def fit_test_model(x):
-    gauss_model = GMM(n_components=2, n_init=5, n_iter=1000)
+    gauss_model = GMM(n_components=2, n_init=5, n_iter=10000, covariance_type='diag')
     gauss_model.fit(x)
 
     return gauss_model
@@ -41,12 +41,12 @@ Given a gauss mix model, prints parameters for each seperate peak
 def print_model_params(gauss_model):
     coeffs = gauss_model.weights_
     mus = [x[0] for x in gauss_model.means_]
-    sigmas = [x[0] for x in gauss_model.covars_]
+    covar = [x[0] for x in gauss_model.covars_]
 
     string = ("Gaussian model: " + str(gauss_model)) + '\n'
     string += ("Coeff:\t" + str(coeffs)) + '\n'
     string += ("Mus:\t" + str(mus)) + '\n'
-    string += ("Sigmas:\t" + str(sigmas)) + '\n'
+    string += ("Sigmas:\t" + str([x[0] ** 0.5 for x in sigmas])) + '\n'
 
     print(string)
 
@@ -93,6 +93,7 @@ def dump_trained_models(file):
         intensities = [[x] for x in gene.intensities]
         model = fit_test_model(intensities)
 
+        print_model_params(model)
         models[gene.name] = model
         i += 1
         if i % 100 == 0:
@@ -106,9 +107,9 @@ if __name__ == "__main__":
     gauss_model = dict["ERBB2"]
     coeffs = gauss_model.weights_
     mus = [x[0] for x in gauss_model.means_]
-    sigmas = [x[0] for x in gauss_model.covars_]
+    sigmas = [x[0] ** 0.5 for x in gauss_model.covars_]
 
-    num_samples = [10000, 10000]
-    gaussian_sampling.plot_multidist(num_samples, mus, sigmas, coeffs, "Combined.png")
+    #num_samples = [10000, 10000]
+    #gaussian_sampling.plot_multidist(num_samples, mus, sigmas, coeffs, "Combined.png")
 
     #def plot_multidist(num_samples, mus, sigmas, coeffs, title, values):
