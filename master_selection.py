@@ -25,6 +25,12 @@ Todo: use an analytical method
 Unsure variance in sampling method
 '''
 def calculate_bayes_error(model):
+    coeffs = model.weights_
+    mus = [x[0] for x in model.means_]
+    sigmas = [x[0] ** 0.5 for x in model.covars_]
+
+    '''
+    #old sampling method
     NUM_TESTS = 10000
     mus = [x[0] for x in model.means_]
     sigmas = [x[0] ** 0.5 for x in model.covars_]
@@ -50,6 +56,7 @@ def calculate_bayes_error(model):
         missClass1 += int(zscore0 < zscore1)
 
     return (abs(missClass0) + abs(missClass1)) / (NUM_TESTS * 2)
+    '''
 
 def calculate_fold_change(model):
     mus = model.means_
@@ -71,15 +78,14 @@ def calculate_popularity(name):
 Model is valid if prior >= 0.1, non-zero popularity.
 Then divide priors of [0.1, 0.5] into 10 bins for each bin take the best (lowest bayes error) 10
 genes for each bin and dump
-
-ToDo: rewrite to be reusuable
 '''
-def dump_best_models(gene_profiles):
-    bin_bounds = [0.1] + [0.1 + x * (0.5 - 0.1) / 10 for x in range(1, 11)]
-    find_bin = lambda prior: 9 if prior == 0.5 \
+def dump_best_models(gene_profiles, num_bins, genes_per_bin):
+    bin_bounds = [0.1] + [0.1 + x * (0.5 - 0.1) / num_bins for x in range(1, num_bins + 1)]
+    find_bin = lambda prior: num_bins if prior == 0.5 \
                                 else sum([i for i in range(0, len(bin_bounds) - 1)
                                   if (prior >= bin_bounds[i] and prior < bin_bounds[i + 1])])
-    bins = [{} for x in range(0, 10)]
+
+    bins = [{} for x in range(0, num_bins)]
 
     start = timeit.default_timer()
 
@@ -108,14 +114,28 @@ def dump_best_models(gene_profiles):
     #bestmodels is k: v where k = gene name and v = bayes error for that model
     best_models = {}
     for bin in bins:
-        best_genes = heapq.nsmallest(10, bin, key=bin.get)
+        best_genes = heapq.nsmallest(10, genes_per_bin, key=bin.get)
+        print(bin)
+        print(best_genes)
+        print()
         for gene in best_genes:
             best_models[gene] = bin[gene]
 
-    pickle.dump(best_models, open("BC_master_genes", 'wb'))
+    print(best_models)
+    pickle.dump(best_models, open("BC_master_genes.pkl", 'wb'))
 
 
 if __name__ == "__main__":
+    master_genes = pickle.load(open("BC_master_genes_old.pkl", 'rb'))
+
+    best_genes = sorted(master_genes, key=master_genes.get)
+    for gene in best_genes:
+        print(gene)
+        print("\t" + str(master_genes[gene]))
+        print()
+
+    '''
+    #code for loading master genes
     print("Loading data set")
     #gene_sets = pickle.load(open("BC_gene_sets.pkl",'rb'))
     gene_profiles = pickle.load(open("BC_trained_models.pkl", 'rb'))
@@ -127,3 +147,4 @@ if __name__ == "__main__":
     end = timeit.default_timer()
 
     print("DONE! Took " + str(end - start) + "s")
+    '''

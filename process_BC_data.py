@@ -7,6 +7,7 @@ paper
 
 import os
 import glob
+import pickle
 
 BC_DATA_DIR = os.getcwd() + "/Data/HybridSets/BC"
 
@@ -15,6 +16,8 @@ BC_CLINICAL_DATA_FILE = BC_DATA_DIR + "/ClinicalData/ClinicalData.txt"
 BC_GENE_SETS_FILE = BC_DATA_DIR + "/GeneSets/c2.all.v5.1.symbols.gmt"
 
 '''
+An error when the expected FileFormat is not met
+
 Parameters:
 file    =   which is incorrectly formatted
 error   =   a custom error message
@@ -55,7 +58,8 @@ class expression_profile:
         return st
 
 '''
-As expression_profile, but for clinical_data
+Contains information about patients (id-ed by sample num)
+Used for finding correlations between phenotype and genotype
 '''
 class clinical_data:
     def __init__(self, sample_num, first_series, posnodes, event_meta,
@@ -78,7 +82,7 @@ class clinical_data:
         self.c1_used = c1_used
 
 '''
-A collection of genes
+A collection of genes pre-grouped due to being on similiar pathway, etc.
 
 set_name = name of the pathway assoc
 url      = broad institute link to pathway info
@@ -92,6 +96,9 @@ class gene_set:
 
 '''
 A patient with a collection of all his/her gene expression profiles
+
+profiles    = a collection of expression_profiles for this sample subject
+sample_num  = the sample's unique number identifier
 '''
 class sample:
     def __init__(self, profiles, sample_num):
@@ -253,6 +260,34 @@ def getGeneSetData(file_name):
         gene_sets.append(gene_set(set_name,set_url, genes))
 
     return gene_sets
+
+'''
+Given a pickle of samples, dumps into gene_sample form, that is maps all expression
+profiles for one gene in one easy to get place
+'''
+def filter_sample_profile_to_gene(file):
+    samples = []
+    for profile in pickle.load(open("BC_expression_profiles.pkl", 'rb')):
+        samples.append(profile)
+
+    genes = []
+    num_genes = len(samples[0].profiles)
+    for i in range(0, num_genes):
+        gene_name = samples[0].profiles[i].gene
+        intensities = []
+        sample_nums = []
+        for person in samples:
+            intensities.append(person.profiles[i].intensity)
+            sample_nums.append(person.sample_num)
+        genes.append(gene_profile(intensities, sample_nums, gene_name))
+
+    check_length = len(genes[0].intensities)
+
+    #check this method works
+    for gene in genes:
+        assert check_length == len(gene.intensities)
+
+    pickle.dump(genes, open(file, 'wb'))
 
 if __name__ == "__main__":
     getGeneSetData(BC_GENE_SETS_FILE)

@@ -21,7 +21,6 @@ from process_BC_data import gene_set
 
 '''
 x should data points of the intensity of the gene in question
-y should be the corresponding class of each sample, supports only binary 1 and 0 for now
 
 plot = boolean value whether to plot the resulting classifier's frequency curve
 title = title of graph to plot
@@ -37,7 +36,7 @@ def fit_test_model(x):
     return gauss_model
 
 '''
-Given a gauss mix model, prints parameters for each seperate peak
+Given a gauss mix model, prints parameters for each gaussian component
 '''
 def print_model_params(gauss_model):
     coeffs = gauss_model.weights_
@@ -47,7 +46,7 @@ def print_model_params(gauss_model):
     string = ("Gaussian model: " + str(gauss_model)) + '\n'
     string += ("Coeff:\t" + str(coeffs)) + '\n'
     string += ("Mus:\t" + str(mus)) + '\n'
-    string += ("Sigmas:\t" + str([x[0] ** 0.5 for x in sigmas])) + '\n'
+    string += ("Sigmas:\t" + str(sigmas) + '\n')
 
     print(string)
 
@@ -104,3 +103,6 @@ def dump_trained_models(file):
 
 if __name__ == "__main__":
     gene_models = pickle.load(open("BC_trained_models.pkl", 'rb'))
+
+    for model in gene_models.keys():
+        print_model_params(gene_models[model])

@@ -81,7 +81,7 @@ def load_BC_data_all(cursor):
     load_BC_data_sets(cursor)
 
 '''
-Tears down and rebuild BC database (PLEASE DON'T CALL UNLESS YOU KNOW WHAT YOU ARE DOING!!!!!)
+Rebuild BC database
 '''
 def rebuild_BC_db(cursor):
     print("Rebuilding BC database...")
@@ -102,9 +102,6 @@ def rebuild_BC_db(cursor):
 '''
 GETTING DATA FROM DATABASE CODE
 '''
-
-#ToDo: deprecate this - go to a model where method can get array of all types, seperate dump methods man
-
 '''
 Creates sample containing all probes linked to a gene and dumps the array of samples into a pickle
 '''
@@ -146,11 +143,8 @@ def dump_gene_profiles(file, cursor):
         cursor.execute("Select Intensity From BC_GeneExpression WHERE Gene= '%s'" % gene_name)
         intensities_rows = cursor.fetchall()
 
-        #importing negatives seems to append
-        #intensities = [row[0] for row in intensities_rows]
-        #intensities = [row[0] for row in intensities_rows]
-        print(gene_name + " " + str(intensities_rows))
-        #genes.append(gene(gene_name, intensities))
+        intensities = [row[0] for row in intensities_rows]
+        genes.append(gene_profile(gene_name, intensities))
 
     pickle.dump(genes, open(file, 'wb'))
 
@@ -173,46 +167,6 @@ def dump_clinical_profiles(file, cursor):
 
     pickle.dump(profiles, open(file, 'wb'))
 
-'''
-Downloads gene set and dumps the array of them into a pickle
-'''
-def dump_clinical_profiles(file, cursor):
-    cursor.execute("Select * FROM BC_GeneSet_URL")
-    rows = cursor.fetchall()
-
-    sets = []
-
-    pickle.dump(sets, open(file, 'wb'))
-
-'''
-Given a pickle of samples, dumps into gene_sample form
-'''
-def filter_sample_profile_to_gene(file):
-    samples = []
-    for profile in read_dumped_data("BC_expression_profiles.pkl"):
-        samples.append(profile)
-
-    genes = []
-    num_genes = len(samples[0].profiles)
-    for i in range(0, num_genes):
-        gene_name = samples[0].profiles[i].gene
-        intensities = []
-        sample_nums = []
-        for person in samples:
-            intensities.append(person.profiles[i].intensity)
-            sample_nums.append(person.sample_num)
-        genes.append(gene_profile(intensities, sample_nums, gene_name))
-
-    check_length = len(genes[0].intensities)
-
-    #check this method works
-    for gene in genes:
-        assert check_length == len(gene.intensities)
-
-    pickle.dump(genes, open(file, 'wb'))
-'''
-ToDo: remove this file
-'''
 def read_dumped_data(file):
     return pickle.load(open(file, 'rb'))
 
