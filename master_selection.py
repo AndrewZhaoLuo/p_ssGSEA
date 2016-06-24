@@ -5,7 +5,9 @@ a "master gene"
 
 import timeit
 import pickle
+import math
 import sqlite3
+from scipy.stats import norm
 from process_BC_data import gene_set
 from process_BC_data import gene_profile
 from random import gauss
@@ -19,44 +21,57 @@ def calculate_prior(model):
     coeffs = model.weights_
 
     return min(coeffs[0], 1- coeffs[0])
+
+'''
+Returns a tuple of roots
+'''
+def solveQuadratic(a, b, c):
+    det = b ** 2 - 4 * a * c
+    r1 = (-b + det ** 0.5) / (2 * a)
+    r2 = (-b - det ** 0.5) / (2 * a)
+
+    return (r1, r2)
+
+'''
+Given the sigma and mu of two distributions, returns the x value where the two distributions are equal
+'''
+def findIntersection(mu1, sigma1, mu2, sigma2):
+    #find coefficient of quadratic
+    a = sigma2 ** 2 - sigma1 ** 2
+    b = 2 * sigma1 ** 2 * mu2 - 2 * sigma2 ** 2 * mu1
+    c = mu1 ** 2 * sigma2 ** 2 - mu2 ** 2 * sigma1 ** 2 - 2 * sigma1 ** 2 * sigma2 ** 2 * math.log(sigma2 / sigma1)
+
+    #find roots of the quadratic
+    return solveQuadratic(a, b, c)
+
 '''
 Todo: use an analytical method
 
 Unsure variance in sampling method
 '''
 def calculate_bayes_error(model):
+    #first we find the intersection point
     coeffs = model.weights_
     mus = [x[0] for x in model.means_]
     sigmas = [x[0] ** 0.5 for x in model.covars_]
+    r1, r2 = findIntersection(mus[0], sigmas[0], mus[1], sigmas[1])
 
-    '''
-    #old sampling method
-    NUM_TESTS = 10000
-    mus = [x[0] for x in model.means_]
-    sigmas = [x[0] ** 0.5 for x in model.covars_]
+    root = 0
+    if r1 < max(mus[0], mus[1]) and r1 > min(mus[0], mus[1]):
+        root = r1
+    else:
+        root = r2
 
-    #print(mus)
-    #print(sigmas)
-    #actual values from the paper
-    #mus = [1.08, 1.65]
-    #sigmas = [0.14, 0.09]
+    #now that we have the intersectionm we need the CDF/survival function of both plots
+    err = 0
+    if(root < mus[0]):
+        err += norm.sf(root, loc=mus[1], scale=sigmas[1]) * coeffs[1]
+        err += norm.cdf(root, loc=mus[0], scale=sigmas[0]) * coeffs[0]
+    else:
+        err += norm.sf(root, loc=mus[0], scale=sigmas[0]) * coeffs[0]
+        err += norm.cdf(root, loc=mus[1], scale=sigmas[1]) * coeffs[1]
 
-    missClass0 = 0
-    missClass1 = 0
-
-    for i in range(0, NUM_TESTS):
-        sample0 = gauss(mus[0], sigmas[0])
-        zscore0 = abs(sample0 - mus[0]) / sigmas[0]
-        zscore1 = abs(sample0 - mus[1]) / sigmas[1]
-        missClass1 += int(zscore1 < zscore0)
-
-        sample1 = gauss(mus[1], sigmas[1])
-        zscore0 = abs(sample1 - mus[0]) / sigmas[0]
-        zscore1 = abs(sample1 - mus[1]) / sigmas[1]
-        missClass1 += int(zscore0 < zscore1)
-
-    return (abs(missClass0) + abs(missClass1)) / (NUM_TESTS * 2)
-    '''
+    return err #/ (norm.sf(-10000, loc=mus[0], scale=sigmas[0]) + norm.sf(-10000, loc=mus[1], scale=sigmas[1]) - err)
 
 def calculate_fold_change(model):
     mus = model.means_
@@ -79,7 +94,7 @@ Model is valid if prior >= 0.1, non-zero popularity.
 Then divide priors of [0.1, 0.5] into 10 bins for each bin take the best (lowest bayes error) 10
 genes for each bin and dump
 '''
-def dump_best_models(gene_profiles, num_bins, genes_per_bin):
+def dump_best_models(gene_profiles, num_bins, genes_per_bin, popularity):
     bin_bounds = [0.1] + [0.1 + x * (0.5 - 0.1) / num_bins for x in range(1, num_bins + 1)]
     find_bin = lambda prior: num_bins if prior == 0.5 \
                                 else sum([i for i in range(0, len(bin_bounds) - 1)
@@ -87,64 +102,49 @@ def dump_best_models(gene_profiles, num_bins, genes_per_bin):
 
     bins = [{} for x in range(0, num_bins)]
 
-    start = timeit.default_timer()
-
     #Here we check every gene fits the criteria and then add it to appropriate bin
     #bins are maps k : v where k = gene name v = bayes error
-    i = 0
     gene_names = gene_profiles.keys()
     for gene in gene_names:
         model = gene_profiles[gene]
 
-        popularity = calculate_popularity(gene)
         prior = calculate_prior(model)
         error = calculate_bayes_error(model)
 
         #pick and get all gene errors
-        if popularity > 0 and prior >= 0.1:
+        if popularity[gene] > 0 and prior >= 0.1:
             bin = find_bin(prior)
             bins[bin][gene] = error
 
-        i += 1
-        if i % 100 == 0:
-            print("Completed classifying " + str(i) + " genes\t" + str(timeit.default_timer() - start) +"s")
-            start = timeit.default_timer()
 
     #then we go through each bin and take the 10 smallest bayes error
     #bestmodels is k: v where k = gene name and v = bayes error for that model
     best_models = {}
     for bin in bins:
-        best_genes = heapq.nsmallest(10, genes_per_bin, key=bin.get)
-        print(bin)
-        print(best_genes)
-        print()
+        best_genes = heapq.nsmallest(genes_per_bin, bin, key=bin.get)
         for gene in best_genes:
             best_models[gene] = bin[gene]
 
     print(best_models)
     pickle.dump(best_models, open("BC_master_genes.pkl", 'wb'))
 
+'''
+precompute the popularity of all genes for future use
+'''
+def dump_gene_popularity(gene_names):
+    gene_pop = {}
+
+    for names in gene_names:
+        gene_pop[names] = calculate_popularity(names)
+
+    pickle.dump(gene_pop, open("BC_gene_popularity.pkl", 'wb'))
+
 
 if __name__ == "__main__":
-    master_genes = pickle.load(open("BC_master_genes_old.pkl", 'rb'))
+    master_genes = pickle.load(open("BC_master_genes.pkl", 'rb'))
 
     best_genes = sorted(master_genes, key=master_genes.get)
     for gene in best_genes:
         print(gene)
         print("\t" + str(master_genes[gene]))
         print()
-
-    '''
-    #code for loading master genes
-    print("Loading data set")
-    #gene_sets = pickle.load(open("BC_gene_sets.pkl",'rb'))
-    gene_profiles = pickle.load(open("BC_trained_models.pkl", 'rb'))
-
-    print("Examining genes...")
-
-    start = timeit.default_timer()
-    dump_best_models(gene_profiles)
-    end = timeit.default_timer()
-
-    print("DONE! Took " + str(end - start) + "s")
-    '''
