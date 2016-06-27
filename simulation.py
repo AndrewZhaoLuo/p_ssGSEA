@@ -58,7 +58,6 @@ def simulate_data(master_gene_model, master_gene_name, sample_profiles, n):
         density2 = norm.pdf(cur_intensity, loc=mu2, scale=sigma2)
 
         probability1 = proportions1 * density1 / (proportions1 * density1 + proportions2 * density2)
-        probability2 = 1 - probability1
 
         if random.random() <= probability1:
             classifications[sample_num] = 0

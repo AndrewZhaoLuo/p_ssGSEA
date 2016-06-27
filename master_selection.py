@@ -3,16 +3,12 @@ This file contains a series of scripts for evaluating gene models and determinin
 a "master gene"
 '''
 
-import timeit
 import pickle
 import math
 import sqlite3
-from scipy.stats import norm
-from process_BC_data import gene_set
-from process_BC_data import gene_profile
-from random import gauss
-
 import heapq
+
+from scipy.stats import norm
 
 '''
 returns the π measure as per the paper
@@ -45,9 +41,14 @@ def findIntersection(mu1, sigma1, mu2, sigma2):
     return solveQuadratic(a, b, c)
 
 '''
-Todo: use an analytical method
+Given two distributions, returns the x coordinate of the decision boundary
+based on where both have equal z scores
+'''
+def findDecisionBoundary(mu1, sigma1, mu2, sigma2):
+    return (mu1 * sigma2 - mu2 * sigma1) / (sigma2 - sigma1)
 
-Unsure variance in sampling method
+'''
+Returns the bayes error of the given mixture model
 '''
 def calculate_bayes_error(model):
     #first we find the intersection point
@@ -94,7 +95,7 @@ Model is valid if prior >= 0.1, non-zero popularity.
 Then divide priors of [0.1, 0.5] into 10 bins for each bin take the best (lowest bayes error) 10
 genes for each bin and dump
 '''
-def dump_best_models(gene_profiles, num_bins, genes_per_bin, popularity):
+def dump_best_models(gene_models, num_bins, genes_per_bin, popularity):
     bin_bounds = [0.1] + [0.1 + x * (0.5 - 0.1) / num_bins for x in range(1, num_bins + 1)]
     find_bin = lambda prior: num_bins if prior == 0.5 \
                                 else sum([i for i in range(0, len(bin_bounds) - 1)
@@ -104,9 +105,9 @@ def dump_best_models(gene_profiles, num_bins, genes_per_bin, popularity):
 
     #Here we check every gene fits the criteria and then add it to appropriate bin
     #bins are maps k : v where k = gene name v = bayes error
-    gene_names = gene_profiles.keys()
+    gene_names = gene_models.keys()
     for gene in gene_names:
-        model = gene_profiles[gene]
+        model = gene_models[gene]
 
         prior = calculate_prior(model)
         error = calculate_bayes_error(model)
@@ -125,7 +126,6 @@ def dump_best_models(gene_profiles, num_bins, genes_per_bin, popularity):
         for gene in best_genes:
             best_models[gene] = bin[gene]
 
-    print(best_models)
     pickle.dump(best_models, open("BC_master_genes.pkl", 'wb'))
 
 '''
@@ -141,6 +141,13 @@ def dump_gene_popularity(gene_names):
 
 
 if __name__ == "__main__":
+
+    gene_models = pickle.load(open("BC_trained_models.pkl", 'rb'))
+    popularity = pickle.load(open("BC_gene_popularity.pkl", 'rb'))
+
+    dump_best_models(gene_models,10,10, popularity)
+
+
     master_genes = pickle.load(open("BC_master_genes.pkl", 'rb'))
 
     best_genes = sorted(master_genes, key=master_genes.get)
