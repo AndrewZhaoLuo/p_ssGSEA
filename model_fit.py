@@ -20,23 +20,21 @@ from process_BC_data import clinical_data
 from process_BC_data import gene_set
 
 '''
-x should data points of the intensity of the gene in question
+Given an array of data points returns a 2 component gaussian mixture model which best estimates
+the distribution of values. Uses E-M algorithm to accomplish this task
 
-plot = boolean value whether to plot the resulting classifier's frequency curve
-title = title of graph to plot
-
-no test/train split since this is a clustering model
+x       =       the data to cluster around
 
 returns the trained model
 '''
 def fit_test_model(x):
-    gauss_model = GMM(n_components=2, n_init=5, n_iter=10000, covariance_type='diag')
-    gauss_model.fit(x)
+    model = GMM(n_components=2, n_init=5, n_iter=10000, covariance_type='diag')
+    model.fit(x)
 
-    return gauss_model
+    return model
 
 '''
-Given a gauss mix model, prints parameters for each gaussian component
+Given a gauss. mix model, prints parameters for each gaussian component
 '''
 def print_model_params(gauss_model):
     coeffs = gauss_model.weights_
@@ -51,11 +49,15 @@ def print_model_params(gauss_model):
     print(string)
 
 '''
-prints out information how the given model clusters and classified real data
-Assuems 1D features
+Evalautes the predictive power of a model and prints out confusion matrix of results
+
+x       =       an array of expression profiles for a gene
+Y       =       an array of phenotype classifications. should be done so the nth index of Y corresponds to
+                    the nth index of array x
+model   =       the model to evluate
 '''
-def print_test_model(x, Y, gauss_model):
-    Y_h = gauss_model.predict(x)
+def evaluate_model(x, Y, model):
+    Y_h = model.predict(x)
 
     tp = 0
     fp = 0
@@ -76,33 +78,3 @@ def print_test_model(x, Y, gauss_model):
     print(tab + tab + "Positive" + tab + "Negative")
     print("Predicted Positive" + tab + str(tp) + tab + str(fp))
     print("Predicted Negative" + tab + str(fn) + tab + str(tn))
-
-'''
-Dumps dictionary key : value where key = gene name, value = bayesian mixed model with 2 peaks
-'''
-def dump_trained_models(file):
-    print("Training model for every gene...")
-    genes = []
-    for gene_sample in read_dumped_data("BC_gene_profiles.pkl"):
-        genes.append(gene_sample)
-
-    i = 0
-    models = {}
-    for i in range(0, len(genes)):
-        gene = genes[i]
-        intensities = [[x] for x in gene.intensities]
-        model = fit_test_model(intensities)
-
-        print_model_params(model)
-        models[gene.name] = model
-        i += 1
-        if i % 100 == 0:
-            print("Finished model #" + str(i))
-
-    pickle.dump(models, open(file, 'wb'))
-
-if __name__ == "__main__":
-    gene_models = pickle.load(open("BC_trained_models.pkl", 'rb'))
-
-    for model in gene_models.keys():
-        print_model_params(gene_models[model])
