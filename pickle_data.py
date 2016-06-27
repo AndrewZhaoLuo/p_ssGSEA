@@ -22,7 +22,6 @@ def dump_clinical_profiles(file, cursor):
         other_fields["first_series"] = first_series
         other_fields["posnodes"] = posnodes
         other_fields["event_meta"] = event_meta
-        other_fields["event_meta"] = event_meta
         other_fields["event_death"] = event_death
         other_fields["time_survival"] = time_survival
         other_fields["time_recur"] = time_recur
@@ -35,7 +34,7 @@ def dump_clinical_profiles(file, cursor):
         other_fields["c1_cross_valid"] = c1_cross_valid
         other_fields["c1_used"] = c1_used
 
-        profiles.append(clinical_data(sample, other_fields))
+        profiles.append(clinical_data(sample_num, other_fields))
 
     pickle.dump(profiles, open(file, 'wb'))
 

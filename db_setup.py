@@ -40,19 +40,21 @@ def create_BC_schema_all(cursor):
 def load_BC_data_expression(cursor):
     gene_profiles = BC.getExpressionProfiles(BC.BC_EXPRESSION_DIR)
     for profile in gene_profiles:
+        other_fields = profile.other_fields
         cursor.execute("INSERT INTO BC_GeneExpression VALUES(?,?,?,?,?,?,?,?)",
-                       (profile.sample_num, profile.substance, profile.gene,
-                        profile.log_ratio, profile.log_error, profile.p_value,
-                        profile.intensity, profile.flag))
+                       (profile.id, other_fields["substance"], profile.gene,
+                        other_fields["log_ratio"], other_fields["log_error"], other_fields["p_value"],
+                        profile.intensity, other_fields["flag"]))
 
 def load_BC_data_clinical(cursor):
     clinical_profiles = BC.getClinicalData(BC.BC_CLINICAL_DATA_FILE)
     for profile in clinical_profiles:
+        other_fields = profile.other_fields
         cursor.execute("INSERT INTO BC_ClinicalData VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                       (profile.sample_num, profile.first_series, profile.posnodes, profile.event_meta,
-                        profile.event_death, profile.time_survival, profile.time_recur, profile.time_meta,
-                        profile.esr1, profile.nih, profile.st_gallen, profile.conserv,
-                        profile.c1_from_data, profile.c1_cross_valid, profile.c1_used))
+                       (profile.id, other_fields["first_series"],other_fields["posnodes"], other_fields["event_meta"],
+                        other_fields["event_death"], other_fields["time_survival"], other_fields["time_recur"], other_fields["time_meta"],
+                        other_fields["esr1"], other_fields["nih"], other_fields["st_gallen"], other_fields["conserv"],
+                        other_fields["c1_from_data"], other_fields["c1_cross_valid"], other_fields["c1_used"]))
 
 def load_BC_data_sets(cursor):
     gene_sets = BC.getGeneSetData(BC.BC_GENE_SETS_FILE)
