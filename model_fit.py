@@ -63,3 +63,26 @@ def evaluate_model(x, Y, model):
     print(tab + tab + "Positive" + tab + "Negative")
     print("Predicted Positive" + tab + str(tp) + tab + str(fp))
     print("Predicted Negative" + tab + str(fn) + tab + str(tn))
+
+'''
+ToDo: documentation
+'''
+def get_trained_models(gene_profiles):
+    print("Training model for every gene...")
+    genes = []
+    for gene_sample in gene_profiles:
+        genes.append(gene_sample)
+
+    i = 0
+    models = {}
+    for i in range(0, len(genes)):
+        gene = genes[i]
+        intensities = [[x] for x in gene.intensities]
+        model = fit_test_model(intensities)
+
+        models[gene.name] = model
+        i += 1
+        if i % 100 == 0:
+            print("Finished model #" + str(i))
+
+    return models
