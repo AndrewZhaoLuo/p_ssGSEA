@@ -33,7 +33,7 @@ class FileFormatError(Exception):
 '''
 Wrapper for expression data, see BC_DATA_DIR/ExpressionProfiles for more details
 There is a one-one correspondance with fields here and fields in the initial dataset
-Don't really need to know what they are
+Don't really need to know what they are, all simple primitives
 '''
 class expression_profile:
     def __init__(self, sample_num, substance, gene, log_ratio, log_error, p_value, intensity, flag):
@@ -59,7 +59,7 @@ class expression_profile:
 
 '''
 Contains information about patients (id-ed by sample num)
-Used for finding correlations between phenotype and genotype
+Used for finding correlations between phenotype and genotype, all simple primitive types
 '''
 class clinical_data:
     def __init__(self, sample_num, first_series, posnodes, event_meta,
@@ -84,9 +84,9 @@ class clinical_data:
 '''
 A collection of genes pre-grouped due to being on similiar pathway, etc.
 
-set_name = name of the pathway assoc
+set_name = name of the pathway assoc. with this gene set
 url      = broad institute link to pathway info
-genes    = list-like strings
+genes    = list-like collection of strings representing genes in this set
 '''
 class gene_set:
     def __init__(self, set_name, url, genes):
@@ -97,7 +97,7 @@ class gene_set:
 '''
 A patient with a collection of all his/her gene expression profiles
 
-profiles    = a collection of expression_profiles for this sample subject
+profiles    = a map of expression_profiles for this sample subject where key = gene name, value = expression_profile
 sample_num  = the sample's unique number identifier
 '''
 class sample:
@@ -107,6 +107,7 @@ class sample:
 
 '''
 The collection of all intensities for one gene
+intensities = list-like collection of floats representing intensity recordings for this gene
 '''
 class gene_profile:
     def __init__(self, intensities, sample_num, name):

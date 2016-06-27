@@ -118,11 +118,11 @@ def dump_expression_profiles(file, cursor):
         #cursor.execute(query)
         sample_profiles = cursor.fetchall()
 
-        profiles = []
+        profiles = {}
         for profile in sample_profiles:
             sample_num, substance, gene, log_ratio, log_error, p_value, intensity, flag = profile
 
-            profiles.append(expression_profile(sample_num, substance, gene, log_ratio,
+            profiles[gene] = (expression_profile(sample_num, substance, gene, log_ratio,
                                                log_error, p_value, intensity, flag))
         samples.append(sample(profiles, num))
 
@@ -174,8 +174,7 @@ if __name__ == "__main__":
     connection = sqlite3.connect("GeneExpression.db")
     cursor = connection.cursor()
 
-    create_BC_schema_sets(cursor)
-    load_BC_data_sets(cursor)
+    dump_expression_profiles("BC_expression_profiles.pkl",cursor)
 
     connection.commit()
 
