@@ -2,22 +2,7 @@
 Contains methods to fit gene expression to mixed gaussian model as per the paper
 '''
 
-import timeit
-import numpy as np
-
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-from db_setup import read_dumped_data
 from sklearn.mixture import GMM
-
-import gaussian_sampling
-import pickle
-
-#for pickle formatting
-from process_BC_data import sample
-from process_BC_data import expression_profile
-from process_BC_data import clinical_data
-from process_BC_data import gene_set
 
 '''
 Given an array of data points returns a 2 component gaussian mixture model which best estimates
