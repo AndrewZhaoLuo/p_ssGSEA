@@ -72,5 +72,5 @@ if __name__ == "__main__":
     profiles = pickle.load(open("BC_expression_profiles.pkl", 'rb'))
 
     ERBB2_model = models["ERBB2"]
-    g = simulate_data(ERBB2_model, "ERBB2", profiles, 100)
+    g = simulate_data(ERBB2_model, "ERBB2", profiles, 10)
     print(g)

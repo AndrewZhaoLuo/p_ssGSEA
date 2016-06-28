@@ -128,25 +128,12 @@ def dump_best_models(gene_models, num_bins, genes_per_bin, popularity):
 
     pickle.dump(best_models, open("BC_master_genes.pkl", 'wb'))
 
-'''
-precompute the popularity of all genes for future use
-'''
-def dump_gene_popularity(gene_names):
-    gene_pop = {}
-
-    for names in gene_names:
-        gene_pop[names] = calculate_popularity(names)
-
-    pickle.dump(gene_pop, open("BC_gene_popularity.pkl", 'wb'))
-
-
 if __name__ == "__main__":
 
     gene_models = pickle.load(open("BC_trained_models.pkl", 'rb'))
     popularity = pickle.load(open("BC_gene_popularity.pkl", 'rb'))
 
     dump_best_models(gene_models,10,10, popularity)
-
 
     master_genes = pickle.load(open("BC_master_genes.pkl", 'rb'))
 

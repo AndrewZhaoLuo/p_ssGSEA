@@ -1,7 +1,9 @@
 import pickle
 
-from model_fit import fit_test_model
+from master_selection import calculate_popularity
 from data_models import *
+
+import sqlite3
 
 #ToDo: documentation!
 
@@ -67,5 +69,51 @@ def dump_expression_profiles(file, cursor):
             profiles[gene] = (expression_profile(sample_num, gene, intensity, other_fields))
 
         samples.append(sample(profiles, num))
+
+    pickle.dump(samples, open(file, 'wb'))
+
+'''
+precompute the popularity of all genes for future use
+'''
+def dump_gene_popularity(gene_names):
+    gene_pop = {}
+
+    for names in gene_names:
+        gene_pop[names] = calculate_popularity(names)
+
+    pickle.dump(gene_pop, open("BC_gene_popularity.pkl", 'wb'))
+
+'''
+dumps all samples man, maps sample_num to sample objects
+'''
+def dump_gene_samples(file, cursor):
+    #first get all unique id's from the db
+    cursor.execute("Select Distinct Sample From BC_ClinicalData")
+    rows = cursor.fetchall()
+    ids = [row[0] for row in rows]
+
+    samples = {}
+    #for each - create the sample
+    for id in ids:
+        cursor.execute("Select * From BC_GeneExpression WHERE Sample='%s' AND NOT Gene=''" % id)
+        rows = cursor.fetchall()
+
+        profiles = {}
+        for row in rows:
+            sample_num, substance, gene, log_ratio, log_error, p_value, intensity, flag = row
+
+            other_fields = {}
+            other_fields["log_ratio"] = log_ratio
+            other_fields["log_error"] = log_error
+            other_fields["p_value"] = p_value
+            other_fields["flag"] = flag
+            other_fields["substance"] = substance
+
+            profile = expression_profile(sample_num, gene, intensity, other_fields)
+            profiles[gene] = profile
+
+
+        samples[id] = sample(profiles, id)
+        print('yay!')
 
     pickle.dump(samples, open(file, 'wb'))
