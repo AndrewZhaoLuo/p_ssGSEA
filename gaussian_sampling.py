@@ -70,17 +70,23 @@ plots graph of sampling from multiple distributions and exports it as a png
 
 see sample_multi_dist for instructions on parameters
 '''
-def plot_multidist(num_samples, mus, sigmas, coeffs, title):
+def plot_multidist(num_samples, mus, sigmas, coeffs, title, combined):
     values = sample_multi_dist(num_samples, mus, sigmas, coeffs)
-    sea.distplot(values)
+    if combined:
+        sea.distplot(values, label="combined")
+    for i in range(0, len(num_samples)):
+        sea.distplot(sample_dist(num_samples[i], mus[i], sigmas[i], coeffs[i]), label=str(i))
+    plotter.legend(loc='upper right')
 
     plotter.title("SAMPLE=" + str(num_samples) + " MU=" + str(mus) + " SIGMA=" + str(sigmas))
     plotter.savefig(title)
     plotter.close()
 
 def plot_multidist_from_values(title, values):
-    sea.distplot(values)
+    for i in range(0, len(values)):
+        sea.distplot(values[i], label=str(i))
 
+    plotter.legend(loc='upper right')
     plotter.title(title)
     plotter.savefig(title)
     plotter.close()

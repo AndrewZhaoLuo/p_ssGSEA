@@ -27,6 +27,8 @@ def calculate_enrichment_score(gene_set, expressions, omega):
 
     #running summations of the PGW and PNG scores in the Barbie et al 2009 paper's algo. desc.
     P_GW_numerator = 0
+    #dead_genes = [x for x in gene_set if x not in expressions.keys()]
+    #print(dead_genes)
     P_GW_denominator = sum([abs(expressions[gene]) ** omega for gene in gene_set])
     P_GW = lambda : P_GW_numerator / P_GW_denominator
 
@@ -110,8 +112,14 @@ def get_model_scores():
 
 '''
 ToDo: make extensible and reusable
+
+simulates phenotype assuming given gene is master gene.
+Then plots the gaussian distribution of the enrichment scores for the given gene set
+broken up by phenotype
+
+#on gene sets
 '''
-def ssgsea_on_simulation(gene, models, profiles):
+def ssgsea_on_simulation(gene, models, profiles, gene_set, title):
 
     #simulate phenotype labels and seperate the class0's/class1's
     model = models[gene]
@@ -121,7 +129,11 @@ def ssgsea_on_simulation(gene, models, profiles):
     class0 = []
     class1 = []
     for profile in profiles:
-        expression = profile.profiles[gene].intensity
+        expression_p = profile.profiles
+        expressions = {}
+        for key in expression_p:
+            expressions[key] = expression_p[key].intensity
+        expression = sum(calculate_enrichment_score(gene_set, expressions, 0.25))
         key = profile.sample_num
         if phenotypes[key] == 1:
             class1.append(expression)
@@ -136,15 +148,29 @@ def ssgsea_on_simulation(gene, models, profiles):
     sigma1 = np.std(class1)
     mu1 = np.mean(class1)
 
-    gaussian_sampling.plot_multidist([100000,100000], [mu0, mu1], [sigma0, sigma1], [1, 1], str(gene) + "_Sim_Phenotypes")
+    #gaussian_sampling.plot_multidist([10000,10000], [mu0, mu1], [sigma0, sigma1], [1, 1], "1_" + title + "_cleaned", False)
+    #gaussian_sampling.plot_multidist_from_values(title="2_" + title + "_raw",values=[class0,class1])
+    score = abs(mu0 - mu1) / (sigma0 + sigma1)
+    print('tic!')
+    return score
 
 if __name__ == "__main__":
     #first load all the models you want
+    gene_set = pickle.load(open("BC_good_gene_sets.pkl", 'rb'))
     models = pickle.load(open("BC_trained_models.pkl", 'rb'))
     profiles = pickle.load(open("BC_expression_profiles.pkl", 'rb'))
 
     print("Loaded models!")
 
-    ssgsea_on_simulation("ERBB2", models, profiles)
-    gaussian_sampling.plot_gauss_mix_model(models["PLXNB3"], "PLXNB3")
+    #set = gene_set[1].genes
+    best_sets = {}
+    for sets in gene_set:
+        set = sets.genes
+        best_sets[sets.set_name] = ssgsea_on_simulation("ERBB2", models, profiles, set, sets.set_name)
+
+    print(best_sets)
+    best_keys = sorted(best_sets, key=best_sets.get, reverse=True)
+    for key in best_keys:
+        print(best_sets[key])
+    #gaussian_sampling.plot_gauss_mix_model(models["PLXNB3"], "PLXNB3")
 
