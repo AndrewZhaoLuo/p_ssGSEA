@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>data_models module &mdash; p_ssGSEA 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="p_ssGSEA 1 documentation" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-data_models">
+<span id="data-models-module"></span><h1>data_models module<a class="headerlink" href="#module-data_models" title="Permalink to this headline">¶</a></h1>
+<p>This file contains the models used for structuring data in gene expression data</p>
+<dl class="class">
+<dt id="data_models.clinical_data">
+<em class="property">class </em><code class="descclassname">data_models.</code><code class="descname">clinical_data</code><span class="sig-paren">(</span><em>id</em>, <em>other_fields</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_models.html#clinical_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data_models.clinical_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents clinical data about each person where a gene sample was collected from</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; represents the unique identifier given to the person this sample was taken from</li>
+<li><strong>other_fields</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; the fields associated with this person. This takes the form of a map where the name
+of each additional field is a key for the value of the field. The map should have strings
+as keys going to objects as values</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="data_models.expression_profile">
+<em class="property">class </em><code class="descclassname">data_models.</code><code class="descname">expression_profile</code><span class="sig-paren">(</span><em>id</em>, <em>gene</em>, <em>intensity</em>, <em>other_fields</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_models.html#expression_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data_models.expression_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a single expression value of a single gene from a single sample.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; represents the unique identifier given to the person this sample was taken from</li>
+<li><strong>gene</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the name of the gene whose expression is recorded in this profile</li>
+<li><strong>intensity</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the expression levels of the gene</li>
+<li><strong>other_fields</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; other fields associated with this profile. This takes the form of a map where the name
+of each additional field is a key for the value of the field. The map should have strings
+as keys going to objects as values</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="data_models.gene_set">
+<em class="property">class </em><code class="descclassname">data_models.</code><code class="descname">gene_set</code><span class="sig-paren">(</span><em>set_name</em>, <em>url</em>, <em>genes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_models.html#gene_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data_models.gene_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents an a priori gene set taken from the Broad institute&#8217;s molecular signatures database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>set_name</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the name of this set</li>
+<li><strong>url</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the MSigDB webpage associated with this gene set</li>
+<li><strong>genes</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#set" title="(in Python v2.7)"><em>set</em></a>) &#8211; a set of genes which are located in this set</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="data_models.sample">
+<em class="property">class </em><code class="descclassname">data_models.</code><code class="descname">sample</code><span class="sig-paren">(</span><em>profiles</em>, <em>id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_models.html#sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data_models.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>A grouping of gene expression profiles under the person who gave the gene sample</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>profiles</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; A mapping of gene_names to expression_profiles</li>
+<li><strong>id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the unique identifier for the person who gave samples which were used to derive the expression_profiles</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/data_models.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Andrew Luo & David Gibbs.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/data_models.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
