@@ -41,24 +41,54 @@
 <span id="model-fit-module"></span><h1>model_fit module<a class="headerlink" href="#module-model_fit" title="Permalink to this headline">¶</a></h1>
 <p>Contains methods to fit gene expression to mixed gaussian model as per the paper</p>
 <dl class="function">
-<dt id="model_fit.evaluate_model">
-<code class="descclassname">model_fit.</code><code class="descname">evaluate_model</code><span class="sig-paren">(</span><em>x</em>, <em>Y</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model_fit.html#evaluate_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model_fit.evaluate_model" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="model_fit.fit_test_model">
 <code class="descclassname">model_fit.</code><code class="descname">fit_test_model</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model_fit.html#fit_test_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model_fit.fit_test_model" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Given a series of samples, representing gene expression, returns a 2-component gaussian mixture model fitted
+to the samples. Expectation-Maximization is used to fit the data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; a list of floats representing gene expression profile samples for one gene. each entry in the list
+should be vectorized! ie. [[1.0], [3.2], [4.3]]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a sklearn.mixture.GMM, which represents a two component gaussian mixture model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="model_fit.get_trained_models">
 <code class="descclassname">model_fit.</code><code class="descname">get_trained_models</code><span class="sig-paren">(</span><em>gene_profiles</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model_fit.html#get_trained_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model_fit.get_trained_models" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Given a mapping of genes to expression values, returns a gaussian model for each gene</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gene_profiles</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; a dictionary of strings representing gene names to lists of floats representing
+expression values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a dict mapping gene names to the trained model of the gene</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="model_fit.print_model_params">
 <code class="descclassname">model_fit.</code><code class="descname">print_model_params</code><span class="sig-paren">(</span><em>gauss_model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/model_fit.html#print_model_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#model_fit.print_model_params" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Prints out the coeff, mean, and standard deviation of the given mixture model. Also prints out information
+related to how the model was built</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>sklearn.mixture.GMM</em>) &#8211; the mixture model of a given gene</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 

@@ -3,24 +3,31 @@ Contains methods to fit gene expression to mixed gaussian model as per the paper
 '''
 
 from sklearn.mixture import GMM
-'''
-Given an array of data points returns a 2 component gaussian mixture model which best estimates
-the distribution of values. Uses E-M algorithm to accomplish this task
 
-x       =       the data to cluster around
-
-returns the trained model
-'''
 def fit_test_model(x):
+    """
+    Given a series of samples, representing gene expression, returns a 2-component gaussian mixture model fitted
+    to the samples. Expectation-Maximization is used to fit the data
+
+    :param x: a list of floats representing gene expression profile samples for one gene. each entry in the list
+              should be vectorized! ie. [[1.0], [3.2], [4.3]]
+    :type x: list
+
+    :returns: a sklearn.mixture.GMM, which represents a two component gaussian mixture model
+    """
     model = GMM(n_components=2, n_init=5, n_iter=10000, covariance_type='diag')
     model.fit(x)
 
     return model
 
-'''
-Given a gauss. mix model, prints parameters for each gaussian component
-'''
 def print_model_params(gauss_model):
+    """
+    Prints out the coeff, mean, and standard deviation of the given mixture model. Also prints out information
+    related to how the model was built
+
+    :param model: the mixture model of a given gene
+    :type model: sklearn.mixture.GMM
+    """
     coeffs = gauss_model.weights_
     mus = [x[0] for x in gauss_model.means_]
     sigmas = [x[0] ** 0.5 for x in gauss_model.covars_]
@@ -32,56 +39,25 @@ def print_model_params(gauss_model):
 
     print(string)
 
-'''
-Evalautes the predictive power of a model and prints out confusion matrix of results
-
-x       =       an array of expression profiles for a gene
-Y       =       an array of phenotype classifications. should be done so the nth index of Y corresponds to
-                    the nth index of array x
-model   =       the model to evluate
-'''
-def evaluate_model(x, Y, model):
-    Y_h = model.predict(x)
-
-    tp = 0
-    fp = 0
-    tn = 0
-    fn = 0
-    for i in range(0, len(Y)):
-        if Y[i] == 1 and Y_h[i] == 1:
-            tp += 1
-        elif Y[i] == 1 and Y_h[i] == 0:
-            fn += 1
-        elif Y[i] == 0 and Y_h[i] == 0:
-            tn += 1
-        elif Y[i] == 0 and Y_h[i] == 1:
-            fp += 1
-
-    tab = "\t\t\t\t"
-    print(tab + tab + "Actual")
-    print(tab + tab + "Positive" + tab + "Negative")
-    print("Predicted Positive" + tab + str(tp) + tab + str(fp))
-    print("Predicted Negative" + tab + str(fn) + tab + str(tn))
-
-'''
-ToDo: documentation
-'''
 def get_trained_models(gene_profiles):
+    """
+    Given a mapping of genes to expression values, returns a gaussian model for each gene
+
+    :param gene_profiles: a dictionary of strings representing gene names to lists of floats representing
+                          expression values
+    :type gene_profiles: dict
+
+    :return: a dict mapping gene names to the trained model of the gene
+    """
+
     print("Training model for every gene...")
+    models = {}
+    for gene in gene_profiles.keys():
+        expressions = [[exp] for exp in gene_profiles[gene]]
+        models[gene] = fit_test_model(expressions)
+
     genes = []
     for gene_sample in gene_profiles:
         genes.append(gene_sample)
-
-    i = 0
-    models = {}
-    for i in range(0, len(genes)):
-        gene = genes[i]
-        intensities = [[x] for x in gene.intensities]
-        model = fit_test_model(intensities)
-
-        models[gene.name] = model
-        i += 1
-        if i % 100 == 0:
-            print("Finished model #" + str(i))
 
     return models
