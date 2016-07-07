@@ -42,6 +42,8 @@
 <span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">This file contains methods for importing and pre-processing the data from the Breast Cancer data set used in the</span>
 <span class="sd">paper &quot;Evaluating gene set enrichment analysis via a hybrid data model&quot; by J. Hua et al. 2014.</span>
+
+<span class="sd">ASSUMES ALL FILES ARE ENCODED AS UTF-7! (Which they are originally!)</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -52,7 +54,7 @@
 <span class="n">BC_DATA_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/Data/HybridSets/BC&quot;</span>
 <span class="n">BC_EXPRESSION_DIR</span> <span class="o">=</span> <span class="n">BC_DATA_DIR</span> <span class="o">+</span> <span class="s2">&quot;/ExpressionProfiles&quot;</span>
 <span class="n">BC_CLINICAL_DATA_FILE</span> <span class="o">=</span> <span class="n">BC_DATA_DIR</span> <span class="o">+</span> <span class="s2">&quot;/ClinicalData/ClinicalData.txt&quot;</span>
-<span class="n">BC_GENE_SETS_FILE</span> <span class="o">=</span> <span class="n">BC_DATA_DIR</span> <span class="o">+</span> <span class="s2">&quot;/GeneSets/c2.all.v5.1.symbols.gmt&quot;</span>
+
 
 <div class="viewcode-block" id="BC_FileFormatError"><a class="viewcode-back" href="../process_BC_data.html#process_BC_data.BC_FileFormatError">[docs]</a><span class="k">class</span> <span class="nc">BC_FileFormatError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -67,8 +69,7 @@
 
 <div class="viewcode-block" id="readExpressionProfile"><a class="viewcode-back" href="../process_BC_data.html#process_BC_data.readExpressionProfile">[docs]</a><span class="k">def</span> <span class="nf">readExpressionProfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reads a single file from the BC set containing gene expression information. Note this assumes the file</span>
-<span class="sd">    is encoded as utf-7! (which it is originally!)</span>
+<span class="sd">    Reads a single file from the BC set containing gene expression information.</span>
 
 <span class="sd">    :param file_name: the path and file containing expression information to read</span>
 <span class="sd">    :type file_name: str</span>
@@ -149,13 +150,6 @@
 
     <span class="k">return</span> <span class="n">expression_profiles</span></div>
 
-<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Given a file containing clinical profiles, reads and returns a list of correlating data_models</span>
-<span class="sd">This assumes the clinical profile format from the 295 sample study in the BC set. Note,</span>
-<span class="sd">this format is encoded in utf-7!</span>
-
-<span class="sd">file_name   =   the name of the file to read information from</span>
-<span class="sd">&#39;&#39;&#39;</span>
 <div class="viewcode-block" id="getClinicalData"><a class="viewcode-back" href="../process_BC_data.html#process_BC_data.getClinicalData">[docs]</a><span class="k">def</span> <span class="nf">getClinicalData</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads clinical information about each patient who gave a gene sample</span>
@@ -213,37 +207,6 @@
         <span class="n">clinical_datas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">clinical_datas</span></div>
-
-<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Reads a file containing gene set data, one set per line, tab seperated where index 0 is the name</span>
-<span class="sd">of the pathway, index 1 is the url for pathway info, and the rest the name of the genes</span>
-
-<span class="sd">file_name   =   the name of the file to read information from</span>
-<span class="sd">&#39;&#39;&#39;</span>
-<div class="viewcode-block" id="getGeneSetData"><a class="viewcode-back" href="../process_BC_data.html#process_BC_data.getGeneSetData">[docs]</a><span class="k">def</span> <span class="nf">getGeneSetData</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ToDo: move to own gene_set import file</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-7&quot;</span><span class="p">)</span>
-
-    <span class="n">gene_sets</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">rows</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">row</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
-            <span class="k">break</span>
-
-        <span class="n">set_info</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">set_name</span> <span class="o">=</span> <span class="n">set_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">set_url</span> <span class="o">=</span> <span class="n">set_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="n">genes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">set_info</span><span class="p">)):</span>
-            <span class="n">genes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">set_info</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-        <span class="n">gene_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gene_set</span><span class="p">(</span><span class="n">set_name</span><span class="p">,</span><span class="n">set_url</span><span class="p">,</span> <span class="n">genes</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">gene_sets</span></div>
 </pre></div>
 
           </div>

@@ -2,15 +2,23 @@
 This is a simple series of script which sets up and retrieves information from the database
 
 IN GENERAL THIS MESSES WITH THE DB SCHEMA, DONT MESS WITH UNLESS YOU KNOW WHAT YOU ARE DOING!!!
+
+ToDo: make code more reusable using row/text factories, proper documentation
 '''
 
 import process_BC_data as BC
+import process_GeneSets as GS
 
-import timeit
+import os
+import sqlite3
 
 '''
-DATABASE CODE
+BC DATABASE
 '''
+BC_DB_BASE_DIR = os.getcwd() + "/Data/AppCache/BC/"
+BC_DB_EXPRESSION = BC_DB_BASE_DIR + "BCExpression.db"
+BC_DB_CLINICAL = BC_DB_BASE_DIR + "BCClinical.db"
+
 #Schema
 def create_BC_schema_expression(cursor):
     cursor.execute('''CREATE TABLE BC_GeneExpression
@@ -23,20 +31,7 @@ def create_BC_schema_clinical(cursor):
         EventDeath int, TimeSurvival real, TimeRecur real, TimeMeta real, ESR1 int,
         NIH int, StGallen int, Conserv int, C1FromData real, C1CrossValid real,
         C1Used real)''')
-
-def create_BC_schema_sets(cursor):
-    cursor.execute('''CREATE TABLE BC_GeneSet_URL
-        (GeneSet text, URL text)''')
-
-    cursor.execute('''CREATE TABLE BC_GeneSet_Genes
-        (GeneSet text, Gene text)''')
-
-def create_BC_schema_all(cursor):
-    create_BC_schema_expression(cursor)
-    create_BC_schema_clinical(cursor)
-    create_BC_schema_sets(cursor)
-
-#data loading
+#Data loading
 def load_BC_data_expression(cursor):
     gene_profiles = BC.readAllExpressionProfiles(BC.BC_EXPRESSION_DIR)
     for profile in gene_profiles:
@@ -48,6 +43,7 @@ def load_BC_data_expression(cursor):
 
 def load_BC_data_clinical(cursor):
     clinical_profiles = BC.getClinicalData(BC.BC_CLINICAL_DATA_FILE)
+    print(clinical_profiles)
     for profile in clinical_profiles:
         other_fields = profile.other_fields
         cursor.execute("INSERT INTO BC_ClinicalData VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -56,8 +52,39 @@ def load_BC_data_clinical(cursor):
                         other_fields["esr1"], other_fields["nih"], other_fields["st_gallen"], other_fields["conserv"],
                         other_fields["c1_from_data"], other_fields["c1_cross_valid"], other_fields["c1_used"]))
 
+#Building databases
+def create_BC_Expression_db():
+    cursor = sqlite3.connect(BC_DB_EXPRESSION)
+
+    create_BC_schema_expression(cursor)
+    load_BC_data_expression(cursor)
+
+    cursor.commit()
+    cursor.close()
+
+def create_BC_Clinical_db():
+    cursor = sqlite3.connect(BC_DB_CLINICAL)
+
+    create_BC_schema_clinical(cursor)
+    load_BC_data_clinical(cursor)
+
+    cursor.commit()
+    cursor.close()
+
+'''
+GENE_SET DATABASE
+'''
+GENE_SET_DB = "./Data/AppCache/GeneSets.db"
+
+def create_GeneSet_schema_sets(cursor):
+    cursor.execute('''CREATE TABLE BC_GeneSet_URL
+        (GeneSet text, URL text)''')
+
+    cursor.execute('''CREATE TABLE BC_GeneSet_Genes
+        (GeneSet text, Gene text)''')
+
 def load_BC_data_sets(cursor):
-    gene_sets = BC.getGeneSetData(BC.BC_GENE_SETS_FILE)
+    gene_sets = GS.readAllGeneSets(GS.GENE_SETS_DIR)
     for set in gene_sets:
         set_name = set.set_name
         set_url = set.url
@@ -69,25 +96,32 @@ def load_BC_data_sets(cursor):
             cursor.execute("INSERT INTO BC_GeneSet_Genes VALUES(?,?)",
                            (set_name, gene))
 
-def load_BC_data_all(cursor):
-    load_BC_data_expression(cursor)
-    load_BC_data_clinical(cursor)
+def create_GeneSet_db():
+    cursor = sqlite3.connect(GENE_SET_DB)
+
+    create_GeneSet_schema_sets(cursor)
     load_BC_data_sets(cursor)
 
-'''
-Rebuild BC database
-'''
-def rebuild_BC_db(cursor):
-    print("Rebuilding BC database...")
+    cursor.commit()
+    cursor.close()
+
+if __name__ == "__main__":
+    import timeit
+
+    print("Building expression db!")
     start = timeit.default_timer()
-
-    #cursor.execute("DROP TABLE IF EXISTS BC_GeneExpression")
-    #cursor.execute("DROP TABLE IF EXISTS BC_ClinicalData")
-    #cursor.execute("DROP TABLE IF EXISTS BC_GeneSet_URL")
-    #cursor.execute("DROP TABLE IF EXISTS BC_GeneSet_Genes")
-
-    create_BC_schema_all(cursor)
-    load_BC_data_all(cursor)
-
+    create_BC_Expression_db()
     end = timeit.default_timer()
-    print("Finished building DB! Took " + str(end - start) + "s")
+    print("DONE! Took " + str(end - start) + "s")
+
+    print("Building expression db!")
+    start = timeit.default_timer()
+    create_BC_Clinical_db()
+    end = timeit.default_timer()
+    print("DONE! Took " + str(end - start) + "s")
+
+    print("Building expression db!")
+    start = timeit.default_timer()
+    create_GeneSet_db()
+    end = timeit.default_timer()
+    print("DONE! Took " + str(end - start) + "s")

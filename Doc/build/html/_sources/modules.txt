@@ -10,5 +10,6 @@ p_ssGSEA
    model_fit
    pickle_data
    process_BC_data
+   process_GeneSets
    simulation
    ssGSEA

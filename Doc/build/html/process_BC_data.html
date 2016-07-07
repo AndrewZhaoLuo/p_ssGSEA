@@ -41,6 +41,7 @@
 <span id="process-bc-data-module"></span><h1>process_BC_data module<a class="headerlink" href="#module-process_BC_data" title="Permalink to this headline">¶</a></h1>
 <p>This file contains methods for importing and pre-processing the data from the Breast Cancer data set used in the
 paper &#8220;Evaluating gene set enrichment analysis via a hybrid data model&#8221; by J. Hua et al. 2014.</p>
+<p>ASSUMES ALL FILES ARE ENCODED AS UTF-7! (Which they are originally!)</p>
 <dl class="exception">
 <dt id="process_BC_data.BC_FileFormatError">
 <em class="property">exception </em><code class="descclassname">process_BC_data.</code><code class="descname">BC_FileFormatError</code><span class="sig-paren">(</span><em>file</em>, <em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/process_BC_data.html#BC_FileFormatError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#process_BC_data.BC_FileFormatError" title="Permalink to this definition">¶</a></dt>
@@ -65,12 +66,6 @@ paper &#8220;Evaluating gene set enrichment analysis via a hybrid data model&#82
 </dd></dl>
 
 <dl class="function">
-<dt id="process_BC_data.getGeneSetData">
-<code class="descclassname">process_BC_data.</code><code class="descname">getGeneSetData</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/process_BC_data.html#getGeneSetData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#process_BC_data.getGeneSetData" title="Permalink to this definition">¶</a></dt>
-<dd><p>ToDo: move to own gene_set import file</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="process_BC_data.readAllExpressionProfiles">
 <code class="descclassname">process_BC_data.</code><code class="descname">readAllExpressionProfiles</code><span class="sig-paren">(</span><em>dir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/process_BC_data.html#readAllExpressionProfiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#process_BC_data.readAllExpressionProfiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads all files containing expression data in the given directory</p>
@@ -89,8 +84,7 @@ paper &#8220;Evaluating gene set enrichment analysis via a hybrid data model&#82
 <dl class="function">
 <dt id="process_BC_data.readExpressionProfile">
 <code class="descclassname">process_BC_data.</code><code class="descname">readExpressionProfile</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/process_BC_data.html#readExpressionProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#process_BC_data.readExpressionProfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads a single file from the BC set containing gene expression information. Note this assumes the file
-is encoded as utf-7! (which it is originally!)</p>
+<dd><p>Reads a single file from the BC set containing gene expression information.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

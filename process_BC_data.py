@@ -1,6 +1,8 @@
 '''
 This file contains methods for importing and pre-processing the data from the Breast Cancer data set used in the
 paper "Evaluating gene set enrichment analysis via a hybrid data model" by J. Hua et al. 2014.
+
+ASSUMES ALL FILES ARE ENCODED AS UTF-7! (Which they are originally!)
 '''
 
 import os
@@ -11,7 +13,7 @@ from data_models import *
 BC_DATA_DIR = os.getcwd() + "/Data/HybridSets/BC"
 BC_EXPRESSION_DIR = BC_DATA_DIR + "/ExpressionProfiles"
 BC_CLINICAL_DATA_FILE = BC_DATA_DIR + "/ClinicalData/ClinicalData.txt"
-BC_GENE_SETS_FILE = BC_DATA_DIR + "/GeneSets/c2.all.v5.1.symbols.gmt"
+
 
 class BC_FileFormatError(Exception):
     """
@@ -26,8 +28,7 @@ class BC_FileFormatError(Exception):
 
 def readExpressionProfile(file_name):
     """
-    Reads a single file from the BC set containing gene expression information. Note this assumes the file
-    is encoded as utf-7! (which it is originally!)
+    Reads a single file from the BC set containing gene expression information.
 
     :param file_name: the path and file containing expression information to read
     :type file_name: str
@@ -108,13 +109,6 @@ def readAllExpressionProfiles(dir):
 
     return expression_profiles
 
-'''
-Given a file containing clinical profiles, reads and returns a list of correlating data_models
-This assumes the clinical profile format from the 295 sample study in the BC set. Note,
-this format is encoded in utf-7!
-
-file_name   =   the name of the file to read information from
-'''
 def getClinicalData(file_name):
     """
     Reads clinical information about each patient who gave a gene sample
@@ -172,34 +166,3 @@ def getClinicalData(file_name):
         clinical_datas.append(data)
 
     return clinical_datas
-
-'''
-Reads a file containing gene set data, one set per line, tab seperated where index 0 is the name
-of the pathway, index 1 is the url for pathway info, and the rest the name of the genes
-
-file_name   =   the name of the file to read information from
-'''
-def getGeneSetData(file_name):
-    """
-    ToDo: move to own gene_set import file
-    """
-    file = open(file_name, 'r', encoding="utf-7")
-
-    gene_sets = []
-    rows = file.read().split('\n')
-
-    for row in rows:
-        if(row == ''):
-            break
-
-        set_info = row.split("\t")
-        set_name = set_info[0]
-        set_url = set_info[1]
-
-        genes = []
-        for i in range(2, len(set_info)):
-            genes.append(set_info[i])
-
-        gene_sets.append(gene_set(set_name,set_url, genes))
-
-    return gene_sets
