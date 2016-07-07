@@ -64,7 +64,7 @@ class sample:
     """
     A grouping of gene expression profiles under the person who gave the gene sample
 
-    :param profiles: A mapping of gene_names to expression_profiles
+    :param profiles: A mapping of gene names to expression_profiles
     :type profiles: dict
 
     :param id: the unique identifier for the person who gave samples which were used to derive the expression_profiles

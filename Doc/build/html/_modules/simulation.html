@@ -56,14 +56,40 @@
 <span class="sd">n samples specifically</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <div class="viewcode-block" id="simulate_data"><a class="viewcode-back" href="../simulation.html#simulation.simulate_data">[docs]</a><span class="k">def</span> <span class="nf">simulate_data</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">master_gene_name</span><span class="p">,</span> <span class="n">sample_profiles</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a list of gaussian mixture models for genes, a master gene, and a list of sample profiles,</span>
+<span class="sd">    returns n simulated phenotypes for each sample profile. This is done by selection of sample profiles</span>
+<span class="sd">    without replacement n times. Note this and the actual simulation is a stochastic process which looks</span>
+<span class="sd">    at the combined likehood for each class according to the mixture model.</span>
+
+<span class="sd">    :requires: n is positive and less than or equal to len(sample_profiles)</span>
+
+<span class="sd">    :param models: a dictionary of strings as gene names to the gaussian mixture model (GMM) for each gene.</span>
+<span class="sd">    :type models: dict</span>
+
+<span class="sd">    :param master_gene_name: the gene to be used as the maste gene for phenotype simulation</span>
+<span class="sd">    :type master_gene_name: str</span>
+
+<span class="sd">    :param sample_profiles: a list of samples (data_models.sample)</span>
+<span class="sd">    :type sample_profiles: list</span>
+
+<span class="sd">    :param n: the number of phenotypes to simulate</span>
+<span class="sd">    :type n: n</span>
+
+<span class="sd">    :return: a dict mapping sample id&#39;s to phenotype classes. This phenotype does not necessarily correspond</span>
+<span class="sd">             to any real phenotype but rather the components of the mixture model of the master gene. class 0 represents</span>
+<span class="sd">             the distribution with a smaller mean while class 1 represents the one with the larger mean.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">master_gene_model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">master_gene_name</span><span class="p">]</span>
+
     <span class="c1">#for selecting random front n values</span>
     <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">sample_profiles</span><span class="p">)</span>
 
     <span class="n">classifications</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="n">cur_profile</span> <span class="o">=</span> <span class="n">sample_profiles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">sample_num</span> <span class="o">=</span> <span class="n">cur_profile</span><span class="o">.</span><span class="n">sample_num</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">cur_profile</span><span class="o">.</span><span class="n">id</span>
         <span class="n">cur_intensity</span> <span class="o">=</span> <span class="n">cur_profile</span><span class="o">.</span><span class="n">profiles</span><span class="p">[</span><span class="n">master_gene_name</span><span class="p">]</span><span class="o">.</span><span class="n">intensity</span>
 
         <span class="c1">#classification of phenotype for this profile</span>
@@ -71,36 +97,39 @@
         <span class="n">mus</span> <span class="o">=</span> <span class="n">master_gene_model</span><span class="o">.</span><span class="n">means_</span>
         <span class="n">sigmas</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">master_gene_model</span><span class="o">.</span><span class="n">covars_</span><span class="p">]</span>
 
-        <span class="c1">#setting 1/2 to the proper low/high peaks</span>
+        <span class="c1">#setting 0/1 to the proper low/high peaks. 0 = smaller mu</span>
         <span class="k">if</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="n">mu1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">sigma1</span> <span class="o">=</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">proportions1</span> <span class="o">=</span> <span class="n">proportions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">mu2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">sigma2</span> <span class="o">=</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">proportions2</span> <span class="o">=</span> <span class="n">proportions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mu0</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">sigma0</span> <span class="o">=</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">proportions0</span> <span class="o">=</span> <span class="n">proportions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">mu1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">sigma1</span> <span class="o">=</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">proportions1</span> <span class="o">=</span> <span class="n">proportions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">mu2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">sigma2</span> <span class="o">=</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">proportions2</span> <span class="o">=</span> <span class="n">proportions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mu0</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">sigma0</span> <span class="o">=</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">proportions0</span> <span class="o">=</span> <span class="n">proportions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mu1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">sigma1</span> <span class="o">=</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">proportions1</span> <span class="o">=</span> <span class="n">proportions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1">#figuring out probability for each sample being in each peak</span>
+        <span class="n">density0</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">cur_intensity</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mu0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma0</span><span class="p">)</span>
         <span class="n">density1</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">cur_intensity</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mu1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma1</span><span class="p">)</span>
-        <span class="n">density2</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">cur_intensity</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mu2</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma2</span><span class="p">)</span>
 
-        <span class="n">probability1</span> <span class="o">=</span> <span class="n">proportions1</span> <span class="o">*</span> <span class="n">density1</span> <span class="o">/</span> <span class="p">(</span><span class="n">proportions1</span> <span class="o">*</span> <span class="n">density1</span> <span class="o">+</span> <span class="n">proportions2</span> <span class="o">*</span> <span class="n">density2</span><span class="p">)</span>
+        <span class="n">probability1</span> <span class="o">=</span> <span class="n">proportions1</span> <span class="o">*</span> <span class="n">density1</span> <span class="o">/</span> <span class="p">(</span><span class="n">proportions1</span> <span class="o">*</span> <span class="n">density1</span> <span class="o">+</span> <span class="n">proportions0</span> <span class="o">*</span> <span class="n">density0</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">probability1</span><span class="p">:</span>
-            <span class="n">classifications</span><span class="p">[</span><span class="n">sample_num</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">classifications</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">classifications</span><span class="p">[</span><span class="n">sample_num</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">classifications</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">return</span> <span class="n">classifications</span></div>
 
 <div class="viewcode-block" id="dump_sim_phenotypes"><a class="viewcode-back" href="../simulation.html#simulation.dump_sim_phenotypes">[docs]</a><span class="k">def</span> <span class="nf">dump_sim_phenotypes</span><span class="p">(</span><span class="n">master_gene</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ToDo: move to caching area</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">master_genes</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_master_genes.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
     <span class="n">models</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_trained_models.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
     <span class="n">profiles</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_expression_profiles.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>

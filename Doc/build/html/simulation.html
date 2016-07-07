@@ -43,12 +43,39 @@
 <dl class="function">
 <dt id="simulation.dump_sim_phenotypes">
 <code class="descclassname">simulation.</code><code class="descname">dump_sim_phenotypes</code><span class="sig-paren">(</span><em>master_gene</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulation.html#dump_sim_phenotypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulation.dump_sim_phenotypes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>ToDo: move to caching area</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="simulation.simulate_data">
 <code class="descclassname">simulation.</code><code class="descname">simulate_data</code><span class="sig-paren">(</span><em>models</em>, <em>master_gene_name</em>, <em>sample_profiles</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulation.html#simulate_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulation.simulate_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Given a list of gaussian mixture models for genes, a master gene, and a list of sample profiles,
+returns n simulated phenotypes for each sample profile. This is done by selection of sample profiles
+without replacement n times. Note this and the actual simulation is a stochastic process which looks
+at the combined likehood for each class according to the mixture model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first">n is positive and less than or equal to len(sample_profiles)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>models</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; a dictionary of strings as gene names to the gaussian mixture model (GMM) for each gene.</li>
+<li><strong>master_gene_name</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the gene to be used as the maste gene for phenotype simulation</li>
+<li><strong>sample_profiles</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; a list of samples (data_models.sample)</li>
+<li><strong>n</strong> (<em>n</em>) &#8211; the number of phenotypes to simulate</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a dict mapping sample id&#8217;s to phenotype classes. This phenotype does not necessarily correspond
+to any real phenotype but rather the components of the mixture model of the master gene. class 0 represents
+the distribution with a smaller mean while class 1 represents the one with the larger mean.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 
