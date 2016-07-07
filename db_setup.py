@@ -43,7 +43,6 @@ def load_BC_data_expression(cursor):
 
 def load_BC_data_clinical(cursor):
     clinical_profiles = BC.getClinicalData(BC.BC_CLINICAL_DATA_FILE)
-    print(clinical_profiles)
     for profile in clinical_profiles:
         other_fields = profile.other_fields
         cursor.execute("INSERT INTO BC_ClinicalData VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -77,10 +76,10 @@ GENE_SET DATABASE
 GENE_SET_DB = "./Data/AppCache/GeneSets.db"
 
 def create_GeneSet_schema_sets(cursor):
-    cursor.execute('''CREATE TABLE BC_GeneSet_URL
+    cursor.execute('''CREATE TABLE GeneSet_URL
         (GeneSet text, URL text)''')
 
-    cursor.execute('''CREATE TABLE BC_GeneSet_Genes
+    cursor.execute('''CREATE TABLE GeneSet_Genes
         (GeneSet text, Gene text)''')
 
 def load_BC_data_sets(cursor):
@@ -88,12 +87,12 @@ def load_BC_data_sets(cursor):
     for set in gene_sets:
         set_name = set.set_name
         set_url = set.url
-        cursor.execute("INSERT INTO BC_GeneSet_URL VALUES(?,?)",
+        cursor.execute("INSERT INTO GeneSet_URL VALUES(?,?)",
                        (set_name, set_url))
 
         genes = set.genes
         for gene in genes:
-            cursor.execute("INSERT INTO BC_GeneSet_Genes VALUES(?,?)",
+            cursor.execute("INSERT INTO GeneSet_Genes VALUES(?,?)",
                            (set_name, gene))
 
 def create_GeneSet_db():
@@ -108,19 +107,21 @@ def create_GeneSet_db():
 if __name__ == "__main__":
     import timeit
 
+    '''
     print("Building expression db!")
     start = timeit.default_timer()
     create_BC_Expression_db()
     end = timeit.default_timer()
     print("DONE! Took " + str(end - start) + "s")
 
-    print("Building expression db!")
+    print("Building clinical db!")
     start = timeit.default_timer()
     create_BC_Clinical_db()
     end = timeit.default_timer()
     print("DONE! Took " + str(end - start) + "s")
+    '''
 
-    print("Building expression db!")
+    print("Building gene set db!")
     start = timeit.default_timer()
     create_GeneSet_db()
     end = timeit.default_timer()

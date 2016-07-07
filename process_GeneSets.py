@@ -6,7 +6,7 @@ import os
 import glob
 from data_models import gene_set
 
-GENE_SETS_DIR = os.getcwd() + "/Data/HybridSets/GeneSets/"
+GENE_SETS_DIR = os.getcwd() + "/Data/GeneSets/"
 
 def readtGeneSetData(file_name):
     """
