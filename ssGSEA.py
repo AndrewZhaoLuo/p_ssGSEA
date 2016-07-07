@@ -2,13 +2,11 @@
 This file contains script for emulating the ssGSEA algorithm from Barbie et al. 2009
 '''
 
-import pickle
-from data_models import gene_set
 import gaussian_sampling
 import model_fit
+import numpy as np
 from simulation import *
 
-import numpy as np
 '''
 Calculates the enrichment score of this profile
 

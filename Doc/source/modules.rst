@@ -11,7 +11,5 @@ p_ssGSEA
    model_fit
    pickle_data
    process_BC_data
-   rpy_snippets
-   shuffle_sim
    simulation
    ssGSEA

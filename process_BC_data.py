@@ -1,30 +1,22 @@
 '''
-BC =  breast cancer data set
-
-This file contains methods for importing and pre-processing the data from the BC data set used in the
-paper
+This file contains methods for importing and pre-processing the data from the Breast Cancer data set used in the
+paper "Evaluating gene set enrichment analysis via a hybrid data model" by J. Hua et al. 2014.
 '''
 
 import os
 import glob
-import pickle
 
 from data_models import *
 
 BC_DATA_DIR = os.getcwd() + "/Data/HybridSets/BC"
-
 BC_EXPRESSION_DIR = BC_DATA_DIR + "/ExpressionProfiles"
 BC_CLINICAL_DATA_FILE = BC_DATA_DIR + "/ClinicalData/ClinicalData.txt"
 BC_GENE_SETS_FILE = BC_DATA_DIR + "/GeneSets/c2.all.v5.1.symbols.gmt"
 
-'''
-An error when the expected FileFormat is not met
-
-Parameters:
-file    =   which is incorrectly formatted
-error   =   a custom error message
-'''
 class FileFormatError(Exception):
+    """
+    This does something
+    """
     def __init__(self, file, error):
         self.file = file
         self.error = error
@@ -64,7 +56,7 @@ def readExpressionProfile(file_name):
     for i in range(2, len(rows)):
         row = rows[i]
 
-        #some of the data has a random newline ¯\_(ツ)_/¯
+        #some of the data has a random newline
         if str(row) == '':
             break
 

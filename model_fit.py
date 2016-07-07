@@ -3,7 +3,6 @@ Contains methods to fit gene expression to mixed gaussian model as per the paper
 '''
 
 from sklearn.mixture import GMM
-
 '''
 Given an array of data points returns a 2 component gaussian mixture model which best estimates
 the distribution of values. Uses E-M algorithm to accomplish this task

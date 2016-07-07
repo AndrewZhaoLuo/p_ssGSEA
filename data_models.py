@@ -43,7 +43,7 @@ class clinical_data:
 
 class gene_set:
     """
-    Represents an a priori gene set taken from the Broad institute's molecular signatures database
+    Represents an *a priori* gene set taken from the Broad institute's molecular signatures database
 
     :param set_name: the name of this set
     :type set_name: str

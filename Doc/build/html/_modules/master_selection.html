@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>master_selection &mdash; p_ssGSEA 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="p_ssGSEA 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for master_selection</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This file contains a series of scripts for evaluating gene models and determining their usability as</span>
+<span class="sd">a &quot;master gene&quot;</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">heapq</span>
+
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">returns the chi measure as per the paper</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="calculate_prior"><a class="viewcode-back" href="../master_selection.html#master_selection.calculate_prior">[docs]</a><span class="k">def</span> <span class="nf">calculate_prior</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">weights_</span>
+
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="o">-</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Returns a tuple of roots</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="solveQuadratic"><a class="viewcode-back" href="../master_selection.html#master_selection.solveQuadratic">[docs]</a><span class="k">def</span> <span class="nf">solveQuadratic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="n">b</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">c</span>
+    <span class="n">r1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">+</span> <span class="n">det</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
+    <span class="n">r2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">-</span> <span class="n">det</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">)</span></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Given the sigma and mu of two distributions, returns the x value where the two distributions are equal</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="findIntersection"><a class="viewcode-back" href="../master_selection.html#master_selection.findIntersection">[docs]</a><span class="k">def</span> <span class="nf">findIntersection</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">):</span>
+    <span class="c1">#find coefficient of quadratic</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">sigma2</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">sigma1</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mu2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma2</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mu1</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">mu1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma2</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">mu2</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma2</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">sigma2</span> <span class="o">/</span> <span class="n">sigma1</span><span class="p">)</span>
+
+    <span class="c1">#find roots of the quadratic</span>
+    <span class="k">return</span> <span class="n">solveQuadratic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Given two distributions, returns the x coordinate of the decision boundary</span>
+<span class="sd">based on where both have equal z scores</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="findDecisionBoundary"><a class="viewcode-back" href="../master_selection.html#master_selection.findDecisionBoundary">[docs]</a><span class="k">def</span> <span class="nf">findDecisionBoundary</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">mu1</span> <span class="o">*</span> <span class="n">sigma2</span> <span class="o">-</span> <span class="n">mu2</span> <span class="o">*</span> <span class="n">sigma1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma2</span> <span class="o">-</span> <span class="n">sigma1</span><span class="p">)</span></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Returns the bayes error of the given mixture model</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="calculate_bayes_error"><a class="viewcode-back" href="../master_selection.html#master_selection.calculate_bayes_error">[docs]</a><span class="k">def</span> <span class="nf">calculate_bayes_error</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="c1">#first we find the intersection point</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">weights_</span>
+    <span class="n">mus</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">means_</span><span class="p">]</span>
+    <span class="n">sigmas</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">covars_</span><span class="p">]</span>
+    <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span> <span class="o">=</span> <span class="n">findIntersection</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">root</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">r1</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="n">r1</span> <span class="o">&gt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">r1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">r2</span>
+
+    <span class="c1">#now that we have the intersectionm we need the CDF/survival function of both plots</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">root</span> <span class="o">&lt;</span> <span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">err</span> <span class="o">+=</span> <span class="n">norm</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">err</span> <span class="o">+=</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">+=</span> <span class="n">norm</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">err</span> <span class="o">+=</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">err</span> <span class="c1">#/ (norm.sf(-10000, loc=mus[0], scale=sigmas[0]) + norm.sf(-10000, loc=mus[1], scale=sigmas[1]) - err)</span></div>
+
+<div class="viewcode-block" id="calculate_fold_change"><a class="viewcode-back" href="../master_selection.html#master_selection.calculate_fold_change">[docs]</a><span class="k">def</span> <span class="nf">calculate_fold_change</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">mus</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">means_</span>
+    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mus</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="calculate_shape_balance"><a class="viewcode-back" href="../master_selection.html#master_selection.calculate_shape_balance">[docs]</a><span class="k">def</span> <span class="nf">calculate_shape_balance</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">sigmas</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">covars_</span>
+
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="calculate_popularity"><a class="viewcode-back" href="../master_selection.html#master_selection.calculate_popularity">[docs]</a><span class="k">def</span> <span class="nf">calculate_popularity</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">connection</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;GeneExpression.db&quot;</span><span class="p">)</span>
+    <span class="n">cursor</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;Select GeneSet From BC_GeneSet_Genes WHERE Gene=&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">())</span></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Model is valid if prior &gt;= 0.1, non-zero popularity.</span>
+<span class="sd">Then divide priors of [0.1, 0.5] into 10 bins for each bin take the best (lowest bayes error) 10</span>
+<span class="sd">genes for each bin and dump</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="dump_best_models"><a class="viewcode-back" href="../master_selection.html#master_selection.dump_best_models">[docs]</a><span class="k">def</span> <span class="nf">dump_best_models</span><span class="p">(</span><span class="n">gene_models</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">,</span> <span class="n">genes_per_bin</span><span class="p">,</span> <span class="n">popularity</span><span class="p">):</span>
+    <span class="n">bin_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.1</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_bins</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">find_bin</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">prior</span><span class="p">:</span> <span class="n">num_bins</span> <span class="k">if</span> <span class="n">prior</span> <span class="o">==</span> <span class="mf">0.5</span> \
+                                <span class="k">else</span> <span class="nb">sum</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_bounds</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                                  <span class="k">if</span> <span class="p">(</span><span class="n">prior</span> <span class="o">&gt;=</span> <span class="n">bin_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">prior</span> <span class="o">&lt;</span> <span class="n">bin_bounds</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])])</span>
+
+    <span class="n">bins</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">)]</span>
+
+    <span class="c1">#Here we check every gene fits the criteria and then add it to appropriate bin</span>
+    <span class="c1">#bins are maps k : v where k = gene name v = bayes error</span>
+    <span class="n">gene_names</span> <span class="o">=</span> <span class="n">gene_models</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gene_names</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">gene_models</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span>
+
+        <span class="n">prior</span> <span class="o">=</span> <span class="n">calculate_prior</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">calculate_bayes_error</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="c1">#pick and get all gene errors</span>
+        <span class="k">if</span> <span class="n">popularity</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">prior</span> <span class="o">&gt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+            <span class="nb">bin</span> <span class="o">=</span> <span class="n">find_bin</span><span class="p">(</span><span class="n">prior</span><span class="p">)</span>
+            <span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">][</span><span class="n">gene</span><span class="p">]</span> <span class="o">=</span> <span class="n">error</span>
+
+
+    <span class="c1">#then we go through each bin and take the 10 smallest bayes error</span>
+    <span class="c1">#bestmodels is k: v where k = gene name and v = bayes error for that model</span>
+    <span class="n">best_models</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="n">bins</span><span class="p">:</span>
+        <span class="n">best_genes</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="n">genes_per_bin</span><span class="p">,</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">bin</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">best_genes</span><span class="p">:</span>
+            <span class="n">best_models</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span>
+
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">best_models</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_master_genes.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">gene_models</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_trained_models.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_gene_popularity.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+
+    <span class="n">dump_best_models</span><span class="p">(</span><span class="n">gene_models</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">popularity</span><span class="p">)</span>
+
+    <span class="n">master_genes</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_master_genes.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+
+    <span class="n">best_genes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">master_genes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">master_genes</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">best_genes</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">master_genes</span><span class="p">[</span><span class="n">gene</span><span class="p">]))</span>
+        <span class="k">print</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Andrew Luo & David Gibbs.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

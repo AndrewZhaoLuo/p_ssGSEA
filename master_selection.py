@@ -11,7 +11,7 @@ import heapq
 from scipy.stats import norm
 
 '''
-returns the π measure as per the paper
+returns the chi measure as per the paper
 '''
 def calculate_prior(model):
     coeffs = model.weights_
