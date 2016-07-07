@@ -1,6 +1,6 @@
 '''
 This file contains a series of scripts for evaluating gene models and determining their usability as
-a "master gene"
+a "master gene."
 '''
 
 import pickle

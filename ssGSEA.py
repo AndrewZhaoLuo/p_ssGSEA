@@ -4,22 +4,28 @@ This file contains script for emulating the ssGSEA algorithm from Barbie et al. 
 
 import model_fit
 import numpy as np
-from Extra_Modules import gaussian_sampling
 from simulation import *
 
-'''
-Calculates the enrichment score of this profile
-
-gene_set = list of genes in this set, every gene in the gene set should be in samples as a key value
-
-samples = a mapping of gene names -> intensity values
-
-omega = the weight bro of the P_G^W term. 0 = just like that russian stat test
-
-returns an array representing the intermediate ES values for each step along the random walk
-To find the total enrichment score, take the sum of all values in this array
-'''
 def calculate_enrichment_score(gene_set, expressions, omega):
+    """
+    Given a gene set, a map of gene names to expression levels, and a weight omega, returns the ssGSEA
+    enrichment score for the gene set as described by *D. Barbie et al 2009*
+
+    :requires: every member of gene_set is a key in expressions
+
+    :param gene_set: a set of gene_names in the set
+    :type gene_set: set
+
+    :param expressions: a dictionary mapping gene names to their expression values
+    :type expressions: dict
+
+    :param omega: the weighted exponent on the :math:`P^W_G` term.
+    :type omega: float
+
+    :returns: an array representing the intermediate Enrichment Scores for each step along the sorted gene list.
+              To find the total enrichment score, take the sum of all values in the array. To replicate a result
+              result closer to GSEA, take the max of the values in the array
+    """
     #list of keys in order to parse to get low -> high values
     keys_sorted = sorted(expressions, key=expressions.get)
 
@@ -52,6 +58,9 @@ def calculate_enrichment_score(gene_set, expressions, omega):
 ToDo: migrate and cleanup, dumps pickles with models based on the enrichments scores of each data set
 '''
 def get_model_pathways():
+    """
+    ToDo: Move to caching
+    """
     gene_sets = pickle.load(open("BC_good_gene_sets.pkl", 'rb'))
     samples = pickle.load(open("BC_sample_profiles.pkl", 'rb'))
     print("Data loaded!")
@@ -81,6 +90,9 @@ def get_model_pathways():
     pickle.dump(models, open("BC_enriched_set_models.pkl", 'wb'))
 
 def get_model_scores():
+    """
+    ToDo: move to caching
+    """
     gene_sets = pickle.load(open("BC_good_gene_sets.pkl", 'rb'))
     samples = pickle.load(open("BC_sample_profiles.pkl", 'rb'))
     print("Data loaded!")
@@ -118,6 +130,9 @@ broken up by phenotype
 #on gene sets
 '''
 def ssgsea_on_simulation(gene, models, profiles, gene_set, title):
+    """
+    ToDo: break up into methods to get the scores, and another to plot
+    """
 
     #simulate phenotype labels and seperate the class0's/class1's
     model = models[gene]
@@ -146,8 +161,8 @@ def ssgsea_on_simulation(gene, models, profiles, gene_set, title):
     sigma1 = np.std(class1)
     mu1 = np.mean(class1)
 
-    gaussian_sampling.plot_multidist([10000, 10000], [mu0, mu1], [sigma0, sigma1], [1, 1], "1_" + title + "_cleaned", False)
-    gaussian_sampling.plot_multidist_from_values(title="2_" + title + "_raw", values=[class0, class1])
+    #gaussian_sampling.plot_multidist([10000, 10000], [mu0, mu1], [sigma0, sigma1], [1, 1], "1_" + title + "_cleaned", False)
+    #gaussian_sampling.plot_multidist_from_values(title="2_" + title + "_raw", values=[class0, class1])
     score = abs(mu0 - mu1) / (sigma0 + sigma1)
     print('tic!')
     return score

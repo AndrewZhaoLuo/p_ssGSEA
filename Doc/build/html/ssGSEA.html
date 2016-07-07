@@ -37,8 +37,55 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="ssgsea-module">
-<h1>ssGSEA module<a class="headerlink" href="#ssgsea-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-ssGSEA">
+<span id="ssgsea-module"></span><h1>ssGSEA module<a class="headerlink" href="#module-ssGSEA" title="Permalink to this headline">¶</a></h1>
+<p>This file contains script for emulating the ssGSEA algorithm from Barbie et al. 2009</p>
+<dl class="function">
+<dt id="ssGSEA.calculate_enrichment_score">
+<code class="descclassname">ssGSEA.</code><code class="descname">calculate_enrichment_score</code><span class="sig-paren">(</span><em>gene_set</em>, <em>expressions</em>, <em>omega</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ssGSEA.html#calculate_enrichment_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ssGSEA.calculate_enrichment_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a gene set, a map of gene names to expression levels, and a weight omega, returns the ssGSEA
+enrichment score for the gene set as described by <em>D. Barbie et al 2009</em></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first">every member of gene_set is a key in expressions</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>gene_set</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#set" title="(in Python v2.7)"><em>set</em></a>) &#8211; a set of gene_names in the set</li>
+<li><strong>expressions</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; a dictionary mapping gene names to their expression values</li>
+<li><strong>omega</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the weighted exponent on the <span class="math">\(P^W_G\)</span> term.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an array representing the intermediate Enrichment Scores for each step along the sorted gene list.
+To find the total enrichment score, take the sum of all values in the array. To replicate a result
+result closer to GSEA, take the max of the values in the array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ssGSEA.get_model_pathways">
+<code class="descclassname">ssGSEA.</code><code class="descname">get_model_pathways</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ssGSEA.html#get_model_pathways"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ssGSEA.get_model_pathways" title="Permalink to this definition">¶</a></dt>
+<dd><p>ToDo: Move to caching</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ssGSEA.get_model_scores">
+<code class="descclassname">ssGSEA.</code><code class="descname">get_model_scores</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ssGSEA.html#get_model_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ssGSEA.get_model_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>ToDo: move to caching</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ssGSEA.ssgsea_on_simulation">
+<code class="descclassname">ssGSEA.</code><code class="descname">ssgsea_on_simulation</code><span class="sig-paren">(</span><em>gene</em>, <em>models</em>, <em>profiles</em>, <em>gene_set</em>, <em>title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ssGSEA.html#ssgsea_on_simulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ssGSEA.ssgsea_on_simulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>ToDo: break up into methods to get the scores, and another to plot</p>
+</dd></dl>
+
 </div>
 
 

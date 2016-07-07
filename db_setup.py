@@ -38,7 +38,7 @@ def create_BC_schema_all(cursor):
 
 #data loading
 def load_BC_data_expression(cursor):
-    gene_profiles = BC.getExpressionProfiles(BC.BC_EXPRESSION_DIR)
+    gene_profiles = BC.readAllExpressionProfiles(BC.BC_EXPRESSION_DIR)
     for profile in gene_profiles:
         other_fields = profile.other_fields
         cursor.execute("INSERT INTO BC_GeneExpression VALUES(?,?,?,?,?,?,?,?)",

@@ -79,7 +79,7 @@
 
 <span class="c1">#data loading</span>
 <div class="viewcode-block" id="load_BC_data_expression"><a class="viewcode-back" href="../db_setup.html#db_setup.load_BC_data_expression">[docs]</a><span class="k">def</span> <span class="nf">load_BC_data_expression</span><span class="p">(</span><span class="n">cursor</span><span class="p">):</span>
-    <span class="n">gene_profiles</span> <span class="o">=</span> <span class="n">BC</span><span class="o">.</span><span class="n">getExpressionProfiles</span><span class="p">(</span><span class="n">BC</span><span class="o">.</span><span class="n">BC_EXPRESSION_DIR</span><span class="p">)</span>
+    <span class="n">gene_profiles</span> <span class="o">=</span> <span class="n">BC</span><span class="o">.</span><span class="n">readAllExpressionProfiles</span><span class="p">(</span><span class="n">BC</span><span class="o">.</span><span class="n">BC_EXPRESSION_DIR</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">profile</span> <span class="ow">in</span> <span class="n">gene_profiles</span><span class="p">:</span>
         <span class="n">other_fields</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">other_fields</span>
         <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;INSERT INTO BC_GeneExpression VALUES(?,?,?,?,?,?,?,?)&quot;</span><span class="p">,</span>

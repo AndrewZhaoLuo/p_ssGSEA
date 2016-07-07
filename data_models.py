@@ -1,6 +1,7 @@
 '''
-This file contains the models used for structuring data in gene expression data
+This file contains the models used for structuring how gene expression data is stored
 '''
+
 class expression_profile:
     """
     Represents a single expression value of a single gene from a single sample.

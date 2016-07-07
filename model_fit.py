@@ -1,5 +1,5 @@
 '''
-Contains methods to fit gene expression to mixed gaussian model as per the paper
+Contains methods to fit gene expression to mixed gaussian model using the Expectation Maximization algorithm
 '''
 
 from sklearn.mixture import GMM

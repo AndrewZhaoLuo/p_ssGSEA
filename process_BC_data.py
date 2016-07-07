@@ -13,9 +13,9 @@ BC_EXPRESSION_DIR = BC_DATA_DIR + "/ExpressionProfiles"
 BC_CLINICAL_DATA_FILE = BC_DATA_DIR + "/ClinicalData/ClinicalData.txt"
 BC_GENE_SETS_FILE = BC_DATA_DIR + "/GeneSets/c2.all.v5.1.symbols.gmt"
 
-class FileFormatError(Exception):
+class BC_FileFormatError(Exception):
     """
-    This does something
+    This class represents an error in formatting from a file from the BC data set.
     """
     def __init__(self, file, error):
         self.file = file
@@ -24,20 +24,22 @@ class FileFormatError(Exception):
     def __str__(self):
         return "File " + str(self.file) + "\n" + str(self.error)
 
-'''
-Given a file containing expression profiles, reads and returns a list of correlating data_models
-This assumes the gene expression profile format from the 295 sample study in the BC set. Note,
-this format is encoded in utf-7!
-
-file_name   =   the name of the file to read information from
-'''
 def readExpressionProfile(file_name):
+    """
+    Reads a single file from the BC set containing gene expression information. Note this assumes the file
+    is encoded as utf-7! (which it is originally!)
+
+    :param file_name: the path and file containing expression information to read
+    :type file_name: str
+
+    :return: a list of expression_profiles
+    """
     file = open(file_name, 'r', encoding="utf-7")
 
     #get rows of the file
     rows = file.read().split("\n")
     if(len(rows) < 2):
-        raise FileFormatError(file, "Labels in top two rows missing")
+        raise BC_FileFormatError(file, "Labels in top two rows missing")
 
     #extract sample id's from rows
     IDs = []
@@ -47,7 +49,7 @@ def readExpressionProfile(file_name):
         if "Sample" in string:
             IDs.append(int(string.split(' ')[1]))
         else:
-            raise FileFormatError(file, "Sample IDs expected or incorrectly formatted")
+            raise BC_FileFormatError(file, "Sample IDs expected or incorrectly formatted")
 
     #extract expression data into here
     expression_profiles = []
@@ -89,14 +91,16 @@ def readExpressionProfile(file_name):
     file.close()
     return expression_profiles
 
-'''
-Reads all expression profile files in the given directory
 
-dir     =       the directory containing the .txt files containing expression profiles to read from
+def readAllExpressionProfiles(dir):
+    """
+    Reads all files containing expression data in the given directory
 
-Returns a list of expression profiles
-'''
-def getExpressionProfiles(dir):
+    :param dir: the directory from where to read all text files containing expression data.
+    :type dir: str
+
+    :return: a list of expression_profiles formed from all files read in the directory
+    """
     files = [filename for filename in glob.glob(os.path.join(dir, "*.txt"))]
     expression_profiles = []
     for file in files:
@@ -112,6 +116,14 @@ this format is encoded in utf-7!
 file_name   =   the name of the file to read information from
 '''
 def getClinicalData(file_name):
+    """
+    Reads clinical information about each patient who gave a gene sample
+
+    :param file_name: the directory and file containing the patient's clinical information
+    :type file_name: str
+
+    :return: a list of clinical_data
+    """
     file = open(file_name, 'r', encoding="utf-7")
 
     clinical_datas = []
@@ -168,6 +180,9 @@ of the pathway, index 1 is the url for pathway info, and the rest the name of th
 file_name   =   the name of the file to read information from
 '''
 def getGeneSetData(file_name):
+    """
+    ToDo: move to own gene_set import file
+    """
     file = open(file_name, 'r', encoding="utf-7")
 
     gene_sets = []

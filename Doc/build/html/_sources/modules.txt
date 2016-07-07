@@ -6,7 +6,6 @@ p_ssGSEA
 
    data_models
    db_setup
-   gaussian_sampling
    master_selection
    model_fit
    pickle_data
