@@ -44,47 +44,165 @@ a &#8220;master gene&#8221;</p>
 <dl class="function">
 <dt id="master_selection.calculate_bayes_error">
 <code class="descclassname">master_selection.</code><code class="descname">calculate_bayes_error</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#calculate_bayes_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.calculate_bayes_error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the bayes error of the given mixture model. This is calculated by integrating the false class density
+around the decision boundary of the model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">the model is composed of two gaussian components!</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>sklearn.mixture.GMM</em>) &#8211; the mixture model of a given gene</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the bayes error of the classifier as a float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="master_selection.calculate_fold_change">
 <code class="descclassname">master_selection.</code><code class="descname">calculate_fold_change</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#calculate_fold_change"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.calculate_fold_change" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the fold change of the given mixture model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">the model is composed of two gaussian components!</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>sklearn.mixture.GMM</em>) &#8211; the mixture model of a given gene</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the fold change of the given gene model as a float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="master_selection.calculate_popularity">
 <code class="descclassname">master_selection.</code><code class="descname">calculate_popularity</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#calculate_popularity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.calculate_popularity" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>ToDo: reorganize so it does not directly query database!</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="master_selection.calculate_prior">
 <code class="descclassname">master_selection.</code><code class="descname">calculate_prior</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#calculate_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.calculate_prior" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Given a gaussian mixture model fitted to the expression of a single gene, returns the prior calculation of the gene</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">the model is composed of two gaussian components!</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>sklearn.mixture.GMM</em>) &#8211; the mixture model of a given gene</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">float representing the calculated prior of this model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="master_selection.calculate_shape_balance">
 <code class="descclassname">master_selection.</code><code class="descname">calculate_shape_balance</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#calculate_shape_balance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.calculate_shape_balance" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the shape imbalance of the given model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">the model is composed of two gaussian components!</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>sklearn.mixture.GMM</em>) &#8211; the mixture model of a given gene</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The shape imbalance of the gene model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="master_selection.dump_best_models">
 <code class="descclassname">master_selection.</code><code class="descname">dump_best_models</code><span class="sig-paren">(</span><em>gene_models</em>, <em>num_bins</em>, <em>genes_per_bin</em>, <em>popularity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#dump_best_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.dump_best_models" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>ToDo: move this to the caching area!</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="master_selection.findDecisionBoundary">
 <code class="descclassname">master_selection.</code><code class="descname">findDecisionBoundary</code><span class="sig-paren">(</span><em>mu1</em>, <em>sigma1</em>, <em>mu2</em>, <em>sigma2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#findDecisionBoundary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.findDecisionBoundary" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Given the parameters describing two gaussian models representing two classes, returns the decision boundary
+for classification. THis assumes classification is done through a <em>z-score</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first">the parameters given describe two different standard deviations</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mu1</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the mean of the first distribution</li>
+<li><strong>sigma1</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the standard deviation of the first distribution</li>
+<li><strong>mu2</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the mean of the second distribution</li>
+<li><strong>sigma2</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the standard deviation of the second distribution</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:returns the decision boundary as a float</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="master_selection.findIntersection">
 <code class="descclassname">master_selection.</code><code class="descname">findIntersection</code><span class="sig-paren">(</span><em>mu1</em>, <em>sigma1</em>, <em>mu2</em>, <em>sigma2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#findIntersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.findIntersection" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Finds and returns the intersection points of two standard deviations</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first">the parameters given describe two different standard deviations</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mu1</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the mean of the first distribution</li>
+<li><strong>sigma1</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the standard deviation of the first distribution</li>
+<li><strong>mu2</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the mean of the second distribution</li>
+<li><strong>sigma2</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the standard deviation of the second distribution</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the intersection points of the two distributions as a tuple pair. If there is only one intersection,
+the point appears twice in the tuple.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="master_selection.solveQuadratic">
 <code class="descclassname">master_selection.</code><code class="descname">solveQuadratic</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/master_selection.html#solveQuadratic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#master_selection.solveQuadratic" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Given coefficients a, b, and c. Solves the quadratic in the form <span class="math">\(ax^2 + bx + c = 0\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first">the determinant of the quadratic is non-zero</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the coefficient of the x^2 term</li>
+<li><strong>b</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the coefficient of the x term</li>
+<li><strong>c</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; the coefficient of 1 term</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple with two values containing two roots of the equation. If there is only one distinct root,
+it will appear twice</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 

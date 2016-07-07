@@ -2,9 +2,9 @@
 This file contains script for emulating the ssGSEA algorithm from Barbie et al. 2009
 '''
 
-import gaussian_sampling
 import model_fit
 import numpy as np
+from Extra_Modules import gaussian_sampling
 from simulation import *
 
 '''
@@ -146,8 +146,8 @@ def ssgsea_on_simulation(gene, models, profiles, gene_set, title):
     sigma1 = np.std(class1)
     mu1 = np.mean(class1)
 
-    gaussian_sampling.plot_multidist([10000,10000], [mu0, mu1], [sigma0, sigma1], [1, 1], "1_" + title + "_cleaned", False)
-    gaussian_sampling.plot_multidist_from_values(title="2_" + title + "_raw",values=[class0,class1])
+    gaussian_sampling.plot_multidist([10000, 10000], [mu0, mu1], [sigma0, sigma1], [1, 1], "1_" + title + "_cleaned", False)
+    gaussian_sampling.plot_multidist_from_values(title="2_" + title + "_raw", values=[class0, class1])
     score = abs(mu0 - mu1) / (sigma0 + sigma1)
     print('tic!')
     return score
