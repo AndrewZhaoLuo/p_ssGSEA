@@ -3,6 +3,12 @@ This is a simple series of script which sets up and retrieves information from t
 
 IN GENERAL THIS MESSES WITH THE DB SCHEMA, DONT MESS WITH UNLESS YOU KNOW WHAT YOU ARE DOING!!!
 
+Note database naming is standarized! There is always a column with Gene, Intensity and Sample in Expression.
+Furthermore all dataset prefixes (ie BC) should be taked on to the beginning of Expression.db or Clinical.db
+to find the proper database!
+
+Known problems: genes like OCT11 get reformatted to 11-Oct -_-
+
 ToDo: make code more reusable using row/text factories, proper documentation
 '''
 
@@ -107,7 +113,6 @@ def create_GeneSet_db():
 if __name__ == "__main__":
     import timeit
 
-    '''
     print("Building expression db!")
     start = timeit.default_timer()
     create_BC_Expression_db()
@@ -119,7 +124,6 @@ if __name__ == "__main__":
     create_BC_Clinical_db()
     end = timeit.default_timer()
     print("DONE! Took " + str(end - start) + "s")
-    '''
 
     print("Building gene set db!")
     start = timeit.default_timer()

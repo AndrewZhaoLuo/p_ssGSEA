@@ -43,11 +43,7 @@
 <span class="sd">This file contains a series of scripts for evaluating gene models and determining their usability as</span>
 <span class="sd">a &quot;master gene.&quot;</span>
 <span class="sd">&#39;&#39;&#39;</span>
-
-<span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">sqlite3</span>
-<span class="kn">import</span> <span class="nn">heapq</span>
 
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
 
@@ -217,72 +213,6 @@
     <span class="n">sigmas</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">covars_</span>
 
     <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">sigmas</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
-
-<div class="viewcode-block" id="calculate_popularity"><a class="viewcode-back" href="../master_selection.html#master_selection.calculate_popularity">[docs]</a><span class="k">def</span> <span class="nf">calculate_popularity</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ToDo: reorganize so it does not directly query database!</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">connection</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;GeneExpression.db&quot;</span><span class="p">)</span>
-    <span class="n">cursor</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
-    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;Select GeneSet From BC_GeneSet_Genes WHERE Gene=&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">())</span></div>
-
-<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Model is valid if prior &gt;= 0.1, non-zero popularity.</span>
-<span class="sd">Then divide priors of [0.1, 0.5] into 10 bins for each bin take the best (lowest bayes error) 10</span>
-<span class="sd">genes for each bin and dump</span>
-<span class="sd">&#39;&#39;&#39;</span>
-<div class="viewcode-block" id="dump_best_models"><a class="viewcode-back" href="../master_selection.html#master_selection.dump_best_models">[docs]</a><span class="k">def</span> <span class="nf">dump_best_models</span><span class="p">(</span><span class="n">gene_models</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">,</span> <span class="n">genes_per_bin</span><span class="p">,</span> <span class="n">popularity</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ToDo: move this to the caching area!</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">bin_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.1</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_bins</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
-    <span class="n">find_bin</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">prior</span><span class="p">:</span> <span class="n">num_bins</span> <span class="k">if</span> <span class="n">prior</span> <span class="o">==</span> <span class="mf">0.5</span> \
-                                <span class="k">else</span> <span class="nb">sum</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_bounds</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                                  <span class="k">if</span> <span class="p">(</span><span class="n">prior</span> <span class="o">&gt;=</span> <span class="n">bin_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">prior</span> <span class="o">&lt;</span> <span class="n">bin_bounds</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])])</span>
-
-    <span class="n">bins</span> <span class="o">=</span> <span class="p">[{}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">)]</span>
-
-    <span class="c1">#Here we check every gene fits the criteria and then add it to appropriate bin</span>
-    <span class="c1">#bins are maps k : v where k = gene name v = bayes error</span>
-    <span class="n">gene_names</span> <span class="o">=</span> <span class="n">gene_models</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gene_names</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">gene_models</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span>
-
-        <span class="n">prior</span> <span class="o">=</span> <span class="n">calculate_prior</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="n">calculate_bayes_error</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-
-        <span class="c1">#pick and get all gene errors</span>
-        <span class="k">if</span> <span class="n">popularity</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">prior</span> <span class="o">&gt;=</span> <span class="mf">0.1</span><span class="p">:</span>
-            <span class="nb">bin</span> <span class="o">=</span> <span class="n">find_bin</span><span class="p">(</span><span class="n">prior</span><span class="p">)</span>
-            <span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">][</span><span class="n">gene</span><span class="p">]</span> <span class="o">=</span> <span class="n">error</span>
-
-
-    <span class="c1">#then we go through each bin and take the 10 smallest bayes error</span>
-    <span class="c1">#bestmodels is k: v where k = gene name and v = bayes error for that model</span>
-    <span class="n">best_models</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="n">bins</span><span class="p">:</span>
-        <span class="n">best_genes</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="n">genes_per_bin</span><span class="p">,</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">bin</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">best_genes</span><span class="p">:</span>
-            <span class="n">best_models</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span>
-
-    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">best_models</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_master_genes.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span></div>
-
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-
-    <span class="n">gene_models</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_trained_models.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_gene_popularity.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-
-    <span class="n">dump_best_models</span><span class="p">(</span><span class="n">gene_models</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">popularity</span><span class="p">)</span>
-
-    <span class="n">master_genes</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_master_genes.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-
-    <span class="n">best_genes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">master_genes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">master_genes</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">best_genes</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">master_genes</span><span class="p">[</span><span class="n">gene</span><span class="p">]))</span>
-        <span class="k">print</span><span class="p">()</span>
 </pre></div>
 
           </div>

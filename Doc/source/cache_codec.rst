@@ -1,7 +1,7 @@
-pickle_data module
+cache_codec module
 ==================
 
-.. automodule:: pickle_data
+.. automodule:: cache_codec
     :members:
     :undoc-members:
     :show-inheritance:

@@ -41,6 +41,10 @@
 <span id="db-setup-module"></span><h1>db_setup module<a class="headerlink" href="#module-db_setup" title="Permalink to this headline">¶</a></h1>
 <p>This is a simple series of script which sets up and retrieves information from the database</p>
 <p>IN GENERAL THIS MESSES WITH THE DB SCHEMA, DONT MESS WITH UNLESS YOU KNOW WHAT YOU ARE DOING!!!</p>
+<p>Note database naming is standarized! There is always a column with Gene, Intensity and Sample in Expression.
+Furthermore all dataset prefixes (ie BC) should be taked on to the beginning of Expression.db or Clinical.db
+to find the proper database!</p>
+<p>Known problems: genes like OCT11 get reformatted to 11-Oct -_-</p>
 <p>ToDo: make code more reusable using row/text factories, proper documentation</p>
 <dl class="function">
 <dt id="db_setup.create_BC_Clinical_db">

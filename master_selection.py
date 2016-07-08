@@ -2,11 +2,7 @@
 This file contains a series of scripts for evaluating gene models and determining their usability as
 a "master gene."
 '''
-
-import pickle
 import math
-import sqlite3
-import heapq
 
 from scipy.stats import norm
 
@@ -176,69 +172,3 @@ def calculate_shape_balance(model):
     sigmas = model.covars_
 
     return max(sigmas[1] / sigmas[0], sigmas[0] / sigmas[1])
-
-def calculate_popularity(name):
-    """
-    ToDo: reorganize so it does not directly query database!
-    """
-    connection = sqlite3.connect("GeneExpression.db")
-    cursor = connection.cursor()
-    cursor.execute("Select GeneSet From BC_GeneSet_Genes WHERE Gene='%s'" % name)
-
-    return len(cursor.fetchall())
-
-'''
-Model is valid if prior >= 0.1, non-zero popularity.
-Then divide priors of [0.1, 0.5] into 10 bins for each bin take the best (lowest bayes error) 10
-genes for each bin and dump
-'''
-def dump_best_models(gene_models, num_bins, genes_per_bin, popularity):
-    """
-    ToDo: move this to the caching area!
-    """
-    bin_bounds = [0.1] + [0.1 + x * (0.5 - 0.1) / num_bins for x in range(1, num_bins + 1)]
-    find_bin = lambda prior: num_bins if prior == 0.5 \
-                                else sum([i for i in range(0, len(bin_bounds) - 1)
-                                  if (prior >= bin_bounds[i] and prior < bin_bounds[i + 1])])
-
-    bins = [{} for x in range(0, num_bins)]
-
-    #Here we check every gene fits the criteria and then add it to appropriate bin
-    #bins are maps k : v where k = gene name v = bayes error
-    gene_names = gene_models.keys()
-    for gene in gene_names:
-        model = gene_models[gene]
-
-        prior = calculate_prior(model)
-        error = calculate_bayes_error(model)
-
-        #pick and get all gene errors
-        if popularity[gene] > 0 and prior >= 0.1:
-            bin = find_bin(prior)
-            bins[bin][gene] = error
-
-
-    #then we go through each bin and take the 10 smallest bayes error
-    #bestmodels is k: v where k = gene name and v = bayes error for that model
-    best_models = {}
-    for bin in bins:
-        best_genes = heapq.nsmallest(genes_per_bin, bin, key=bin.get)
-        for gene in best_genes:
-            best_models[gene] = bin[gene]
-
-    pickle.dump(best_models, open("BC_master_genes.pkl", 'wb'))
-
-if __name__ == "__main__":
-
-    gene_models = pickle.load(open("BC_trained_models.pkl", 'rb'))
-    popularity = pickle.load(open("BC_gene_popularity.pkl", 'rb'))
-
-    dump_best_models(gene_models,10,10, popularity)
-
-    master_genes = pickle.load(open("BC_master_genes.pkl", 'rb'))
-
-    best_genes = sorted(master_genes, key=master_genes.get)
-    for gene in best_genes:
-        print(gene)
-        print("\t" + str(master_genes[gene]))
-        print()

@@ -50,11 +50,16 @@ def get_trained_models(gene_profiles):
     :return: a dict mapping gene names to the trained model of the gene
     """
 
-    print("Training model for every gene...")
+    print("\tTraining model for every gene...")
+    i = 0
     models = {}
     for gene in gene_profiles.keys():
         expressions = [[exp] for exp in gene_profiles[gene]]
         models[gene] = fit_test_model(expressions)
+
+        i += 1
+        if i % 100 == 0:
+            print("Trained " + str(i) + " out of " + str(len(gene_profiles.keys())))
 
     genes = []
     for gene_sample in gene_profiles:
