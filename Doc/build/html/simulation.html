@@ -41,12 +41,6 @@
 <span id="simulation-module"></span><h1>simulation module<a class="headerlink" href="#module-simulation" title="Permalink to this headline">¶</a></h1>
 <p>This module contains methods for simulating data given a hybrid data model</p>
 <dl class="function">
-<dt id="simulation.dump_sim_phenotypes">
-<code class="descclassname">simulation.</code><code class="descname">dump_sim_phenotypes</code><span class="sig-paren">(</span><em>master_gene</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulation.html#dump_sim_phenotypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulation.dump_sim_phenotypes" title="Permalink to this definition">¶</a></dt>
-<dd><p>ToDo: move to caching area</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="simulation.simulate_data">
 <code class="descclassname">simulation.</code><code class="descname">simulate_data</code><span class="sig-paren">(</span><em>models</em>, <em>master_gene_name</em>, <em>sample_profiles</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simulation.html#simulate_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simulation.simulate_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of gaussian mixture models for genes, a master gene, and a list of sample profiles,
@@ -64,7 +58,7 @@ at the combined likehood for each class according to the mixture model.</p>
 <li><strong>models</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; a dictionary of strings as gene names to the gaussian mixture model (GMM) for each gene.</li>
 <li><strong>master_gene_name</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the gene to be used as the maste gene for phenotype simulation</li>
 <li><strong>sample_profiles</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; a list of samples (data_models.sample)</li>
-<li><strong>n</strong> (<em>n</em>) &#8211; the number of phenotypes to simulate</li>
+<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the number of phenotypes to simulate</li>
 </ul>
 </td>
 </tr>

@@ -33,7 +33,7 @@ def simulate_data(models, master_gene_name, sample_profiles, n):
     :type sample_profiles: list
 
     :param n: the number of phenotypes to simulate
-    :type n: n
+    :type n: int
 
     :return: a dict mapping sample id's to phenotype classes. This phenotype does not necessarily correspond
              to any real phenotype but rather the components of the mixture model of the master gene. class 0 represents
@@ -84,27 +84,6 @@ def simulate_data(models, master_gene_name, sample_profiles, n):
             classifications[id] = 0
 
     return classifications
-
-def dump_sim_phenotypes(master_gene, n):
-    """
-    ToDo: move to caching area
-    """
-    master_genes = pickle.load(open("BC_master_genes.pkl", 'rb'))
-    models = pickle.load(open("BC_trained_models.pkl", 'rb'))
-    profiles = pickle.load(open("BC_expression_profiles.pkl", 'rb'))
-    ERBB2_model = models[master_gene]
-    print("loaded data!")
-
-    #generate one hundred different data sets
-    data_sets = []
-
-    for i in range(0, n):
-        labels = simulate_data(ERBB2_model, "ERBB2", profiles, 295)
-        print(labels)
-        data_sets.append(labels)
-
-    pickle.dump(data_sets, open("BC_simulated_phenotypes.pkl", 'wb'))
-
 if __name__ == "__main__":
     data_sets = pickle.load(open("BC_simulated_phenotypes2.pkl", 'rb'))
 

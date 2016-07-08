@@ -74,7 +74,7 @@
 <span class="sd">    :type sample_profiles: list</span>
 
 <span class="sd">    :param n: the number of phenotypes to simulate</span>
-<span class="sd">    :type n: n</span>
+<span class="sd">    :type n: int</span>
 
 <span class="sd">    :return: a dict mapping sample id&#39;s to phenotype classes. This phenotype does not necessarily correspond</span>
 <span class="sd">             to any real phenotype but rather the components of the mixture model of the master gene. class 0 represents</span>
@@ -125,27 +125,6 @@
             <span class="n">classifications</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">return</span> <span class="n">classifications</span></div>
-
-<div class="viewcode-block" id="dump_sim_phenotypes"><a class="viewcode-back" href="../simulation.html#simulation.dump_sim_phenotypes">[docs]</a><span class="k">def</span> <span class="nf">dump_sim_phenotypes</span><span class="p">(</span><span class="n">master_gene</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ToDo: move to caching area</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">master_genes</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_master_genes.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-    <span class="n">models</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_trained_models.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-    <span class="n">profiles</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_expression_profiles.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-    <span class="n">ERBB2_model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">master_gene</span><span class="p">]</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;loaded data!&quot;</span><span class="p">)</span>
-
-    <span class="c1">#generate one hundred different data sets</span>
-    <span class="n">data_sets</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">simulate_data</span><span class="p">(</span><span class="n">ERBB2_model</span><span class="p">,</span> <span class="s2">&quot;ERBB2&quot;</span><span class="p">,</span> <span class="n">profiles</span><span class="p">,</span> <span class="mi">295</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-        <span class="n">data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-
-    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_sets</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_simulated_phenotypes.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span></div>
-
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">data_sets</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_simulated_phenotypes2.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
 

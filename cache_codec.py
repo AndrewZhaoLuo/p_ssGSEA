@@ -382,6 +382,69 @@ def load_best_models(dataset, num_bins, genes_per_bin):
     dump_best_models(dataset, num_bins, genes_per_bin)
     return load_all_gene_sets()
 
+'''
+****************************Simulating Phenotypes****************************
+'''
+PHENOTYPE_SIMS_FILE = lambda dataset, n, master_gene: DATA_DIR + "/" + dataset + "/" + dataset + "_SimPheno_" \
+                                                        + "Gene_" + str(master_gene) + "_N_" + str(n) + ".pkl"
+'''Returns the path used to cache/uncache gene popularity for the given dataset'''
+from simulation import simulate_data
+def dump_sim_phenotypes(dataset, n, master_gene):
+    '''
+    From the gene expressions and samples of the given dataset, simulates n tables of phenotypes for each sample with
+    the given master_gene.
+
+    Dumps a file of lists of dicts mapping id's to class (0 or 1)
+
+    In general class 0 has lower gene expression levels of the master gene than class 1.
+
+    :param dataset: the dataset from which to reference data from
+    :type dataset: str
+
+    :param n: the number of simulations to run
+    :type n: int
+
+    :param master_gene: the master gene used to simulate data
+    :type master_gene: str
+    '''
+
+    models = load_gene_models(dataset)
+    samples = load_sample_profiles(dataset)
+
+    data_sets = []
+
+    for i in range(0, n):
+        labels = simulate_data(models, "ERBB2", [samples[key] for key in samples.keys()], len(samples))
+        data_sets.append(labels)
+
+    pickle.dump(data_sets, open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'wb'))
+
+def load_sim_phenotypes(dataset, n, master_gene):
+    '''
+    Returns the a set of n simulated phenotypes using the given mastergene, caching data along the way
+
+    :param dataset: the dataset from which to reference data from
+    :type dataset: str
+
+    :param n: the number of simulations to run
+    :type n: int
+
+    :param master_gene: the master gene used to simulate data
+    :type master_gene: str
+    '''
+    if os.path.exists(PHENOTYPE_SIMS_FILE(dataset, n, master_gene)):
+        print("\tOpenning cached simulated phenotype data!")
+        return pickle.load(open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'rb'))
+
+    print("\tCalculating and saving simulated phenotype data!")
+    dump_sim_phenotypes(dataset, n, master_gene)
+    return load_sim_phenotypes(dataset, n, master_gene)
+
+'''
+****************************Simulating Phenotypes****************************
+'''
+
 if __name__ == "__main__":
-    g = load_best_models("BC", 10, 10)
+    g = load_sim_phenotypes("BC", 10, "ERBB2")
+
     print(g)
