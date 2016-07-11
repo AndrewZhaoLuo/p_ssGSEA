@@ -89,37 +89,6 @@ def get_model_pathways():
 
     pickle.dump(models, open("BC_enriched_set_models.pkl", 'wb'))
 
-def get_model_scores():
-    """
-    ToDo: move to caching
-    """
-    gene_sets = pickle.load(open("BC_good_gene_sets.pkl", 'rb'))
-    samples = pickle.load(open("BC_sample_profiles.pkl", 'rb'))
-    print("Data loaded!")
-
-    paths = {}
-    #for each gene set
-    for set in gene_sets:
-        gene_set = set.genes
-
-        #go through all the samples and calculate the ES
-        scores = {}
-        for id in samples.keys():
-            profile = samples[id].profiles
-            expressions = {}
-
-            for gene in profile.keys():
-                expressions[gene] = profile[gene].intensity
-
-            score = calculate_enrichment_score(gene_set, expressions, 0.25)
-            scores[id] = sum(score)
-
-        paths[set.set_name] = scores
-        print("1 set done enriched scores!")
-
-    pickle.dump(paths, open("BC_ssgsea_scores.pkl", 'wb'))
-
-
 '''
 ToDo: make extensible and reusable
 

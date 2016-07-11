@@ -234,10 +234,10 @@ def dump_filtered_gene_sets(dataset):
     for set_name in gene_sets:
         cur_set = gene_sets[set_name]
         new_genes = {gene for gene in cur_set.genes if gene in valid_genes}
-        if len(new_genes) > 0:
+        if len(new_genes) == len(cur_set.genes):
             filtered_sets[set_name] = gene_set(set_name, cur_set.url, new_genes)
 
-    pickle.dump(gene_sets, open(FILTERED_GENE_SET_FILE(dataset), 'wb'), protocol=-1)
+    pickle.dump(filtered_sets, open(FILTERED_GENE_SET_FILE(dataset), 'wb'), protocol=-1)
 
 def load_filtered_gene_sets(dataset):
     '''
@@ -252,7 +252,7 @@ def load_filtered_gene_sets(dataset):
 
     print("\tSaving gene sets!")
     dump_filtered_gene_sets(dataset)
-    return load_all_gene_sets()
+    return load_filtered_gene_sets(dataset)
 
 '''
 ****************************Dataset specific clinical profiles****************************
@@ -441,10 +441,64 @@ def load_sim_phenotypes(dataset, n, master_gene):
     return load_sim_phenotypes(dataset, n, master_gene)
 
 '''
-****************************Simulating Phenotypes****************************
+****************************ssGSEA Phenotypes****************************
 '''
+ssGSEA_SCORES_FILES = lambda dataset: DATA_DIR + "/" + dataset + "/" + dataset + "_ssGSEAScores.pkl"
+'''Returns the path used to cache/uncache gene enrichment scores per id'''
+from ssGSEA import calculate_enrichment_score
+def dump_ssGSEA_scores(dataset):
+    """
+    For every id and good gene set of the given dataset, dumps enrichment score information. Specifically dumps
+    a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set.
+
+    :param dataset: the dataset from which to reference data from
+    :type dataset: str
+    """
+    gene_sets = load_filtered_gene_sets(dataset)
+    samples = load_sample_profiles(dataset)
+
+    paths = {}
+    #for each gene set
+    for set in gene_sets.keys():
+        gene_set = gene_sets[set].genes
+
+        #go through all the samples and calculate the ES
+        scores = {}
+        for id in samples.keys():
+            profile = samples[id].profiles
+            expressions = {}
+
+            for gene in profile.keys():
+                expressions[gene] = profile[gene].intensity
+
+            score = calculate_enrichment_score(gene_set, expressions, 0.25)
+
+            #ToDo: normalize scores?
+            scores[id] = sum(score)
+
+        paths[set] = scores
+        print("1 set done enriched scores our of " + str(len(gene_sets.keys())))
+
+    pickle.dump(paths, open(ssGSEA_SCORES_FILES(dataset), 'wb'))
+
+def load_ssGSEA_scores(dataset):
+    '''
+    Returns a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set
+
+    :param dataset: the dataset from which to reference data from
+    :type dataset: str
+
+    :returns: a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores
+    '''
+
+    if os.path.exists(ssGSEA_SCORES_FILES(dataset)):
+        print("\tOpenning cached gene sets!")
+        return pickle.load(open(ssGSEA_SCORES_FILES(dataset), 'rb'))
+
+    print("\tSaving gene sets!")
+    dump_ssGSEA_scores(dataset)
+    return load_ssGSEA_scores(dataset)
+
 
 if __name__ == "__main__":
-    g = load_sim_phenotypes("BC", 10, "ERBB2")
-
-    print(g)
+    g = load_ssGSEA_scores("BC")

@@ -83,12 +83,10 @@ def plot_multidist(num_samples, mus, sigmas, coeffs, title, combined):
     plotter.close()
 
 def plot_multidist_from_values(title, values):
-    #for i in range(0, len(values)):
-    #    sea.distplot(values[i], label=str(i))
+    for i in range(0, len(values)):
+        sea.distplot(values[i], label=str(i))
 
-    sea.distplot(values)
-
-    #plotter.legend(loc='upper right')
+    plotter.legend(loc='upper right')
     plotter.title(title)
     plotter.savefig(title)
     plotter.close()
