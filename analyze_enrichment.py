@@ -6,8 +6,11 @@ import scipy.stats as stats
 
 def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
     '''
-    :param enrichment_scores: a mapping of gene_set names to a dictionary mapping id's to their enrichment scores
-    for the gene_set
+    This script given a series of enrichment scores and phenotypes, returns a tuple of lists representing the
+    enrichment for class 0/1 phenotypes
+
+    :param enrichment_scores: a mapping of gene_set names to a dictionary mapping id's to their enrichment scores for \
+    the gene_set
     :type enrichment_scores: dict
 
     :param phenotype: a mapping of sample id's to the sample's phenotype, either 0 or 1
@@ -41,17 +44,17 @@ def rank_by_t_test(enrichment_scores, phenotypes):
     to a tuple in the form (a, b) where a is the t-score found by comparing the distributions of enrichment scores
     found between samples with different phenotype classes and b is the p-value
 
-    :param enrichment_scores: a mapping of gene_set names to a dictionary mapping id's to their enrichment scores
-    for the gene_set
+    :param enrichment_scores: a mapping of gene_set names to a dictionary mapping id's to their enrichment scores for \
+    the gene_set
     :type enrichment_scores: dict
 
-    :param phenotypes: a list of maps, each map a mapping of sample id's to the sample's phenotype, either 0 or 1. Each
-    map represents a series of simulated phenotypes
+    :param phenotypes: a list of maps, each map a mapping of sample id's to the sample's phenotype, either 0 or 1. \
+    Each map represents a series of simulated phenotypes
     :type phenotypes: dict
 
     :returns: a list of maps, mapping gene_sets to a tuple of representing t-score and p-value
     '''
-    gene_sets = enrichmentScores.keys()
+    gene_sets = enrichment_scores.keys()
 
     rankings = []
     for trial in range(0, len(phenotypes)):
@@ -68,11 +71,12 @@ def rank_by_t_test(enrichment_scores, phenotypes):
 def evaluate_rankings(rankings, gene_sets, master_gene):
     '''
     Given a list of dicts mapping gene_set to a tuple describing t-statistic and p-value, returns the ranking's
-    ability at including the master_gene in the top sets
+    ability at including the master_gene in the top sets.
 
-    **ToDo:**refine ranking
+    ToDo: refine ranking
 
-    :rankings: a list mapping of gene_sets to tuples containg the tstatistic and pvalue of the gene set in seperating the two classes
+    :param rankings: a list mapping of gene_sets to tuples containg the tstatistic and pvalue of the gene set in \
+    seperating the two classes
     :type rankings: list
 
     :param gene_sets: a mapping of gene_set names to gene_sets
@@ -81,7 +85,7 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
     :param master_gene: the master_gene to which we expect to show up in the top k-rankings
     :type master_gene: str
 
-    :returns: a list, with each element being the "score" calculated on the ranking of the master_gene in the given
+    :returns: a list, with each element being the "score" calculated on the ranking of the master_gene in the given \
     rankings
     '''
 
@@ -115,9 +119,6 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
     master_gene_ranks = []
     for ranking in rankings:
         scores = linear_method(ranking)
-        print(scores)
-        #scores = squared_method(ranking)
-
         sorted_genes = sorted(scores, key=scores.get)
         i = 0
         for gene in sorted_genes:
@@ -126,23 +127,6 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
                 master_gene_ranks.append(i)
 
     return master_gene_ranks
-
-if __name__ == "__main__":
-    import cache_codec
-
-    MASTER_GENE = "ERBB2"
-    DATASET = "BC"
-
-    enrichmentScores = cache_codec.load_ssGSEA_scores(DATASET)
-    gene_set_names = enrichmentScores.keys()
-    phenotypes = cache_codec.load_sim_phenotypes(DATASET, 10, MASTER_GENE)
-    print(phenotypes)
-
-    rankings = rank_by_t_test(enrichmentScores, phenotypes)
-
-    gene_sets = cache_codec.load_filtered_gene_sets(DATASET)
-    evaluate_rankings(rankings, gene_sets, MASTER_GENE)
-
 
 
 

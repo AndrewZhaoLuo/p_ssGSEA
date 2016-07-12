@@ -4,6 +4,7 @@ p_ssGSEA
 .. toctree::
    :maxdepth: 4
 
+   analyze_enrichment
    cache_codec
    data_models
    db_setup

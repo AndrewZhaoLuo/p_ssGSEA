@@ -1,5 +1,7 @@
 '''
 This module handles caching and uncaching data using pickle, as well as deciding when to cache/uncache data
+
+General ToDo: better RAM caching
 '''
 
 import os
@@ -7,10 +9,15 @@ import pickle
 import sqlite3
 from data_models import *
 
+#to do: pick better policy/write own
+from functools import lru_cache
+
 DATASETS = {"BC"}
 DATA_DIR = os.getcwd() + "/Data/AppCache"
 
-EXPRESSION_PROFILES_FILE = lambda dataset: DATA_DIR + "/" + dataset + "/" +  dataset + "_SampleProfiles.pkl"
+EXPRESSION_PROFILES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+
+EXPRESSION_PROFILES_FILE = lambda dataset: EXPRESSION_PROFILES_DIR(dataset) +  dataset + "_SampleProfiles.pkl"
 '''Returns the path used to cache/uncache expression profiles for the given dataset'''
 
 EXPRESSION_PROFILE_DB = lambda dataset: DATA_DIR + "/" + dataset + "/" + dataset + "Expression.db"
@@ -27,6 +34,9 @@ def dump_sample_profiles(dataset):
     :param dataset: the name of the dataset downloading data from
     :type dataset: str
     '''
+    if not os.path.exists(EXPRESSION_PROFILES_DIR(dataset)):
+        os.makedirs(EXPRESSION_PROFILES_DIR(dataset))
+
     cursor = sqlite3.connect(EXPRESSION_PROFILE_DB(dataset)).cursor()
     table = EXPRESSION_PROFILE_DBTABLE(dataset)
 
@@ -52,6 +62,7 @@ def dump_sample_profiles(dataset):
 
     pickle.dump(samples, open(EXPRESSION_PROFILES_FILE(dataset), 'wb'), protocol=-1)
 
+@lru_cache(maxsize=256)
 def load_sample_profiles(dataset):
     '''
     Returns expression data for the dataset, caching information along the way.
@@ -73,7 +84,8 @@ def load_sample_profiles(dataset):
 ****************************Model fitting****************************
 '''
 from model_fit import get_trained_models
-GENE_MODELS_FILE = lambda dataset: DATA_DIR + "/" + dataset + "/" + dataset + "_GMM_Models.pkl"
+GENE_MODELS_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+GENE_MODELS_FILE = lambda dataset: GENE_MODELS_DIR(dataset) + dataset + "_GMM_Models.pkl"
 def dump_gene_models(dataset):
     '''
     Utilizing sample information, uses expression levels across samples for genes in order to train a GMM
@@ -83,6 +95,9 @@ def dump_gene_models(dataset):
     :param dataset: the name of the dataset downloading data from
     :type dataset: str
     '''
+
+    if not os.path.exists(GENE_MODELS_DIR(dataset)):
+        os.makedirs(GENE_MODELS_DIR(dataset))
 
     samples = load_sample_profiles(dataset)
 
@@ -103,6 +118,7 @@ def dump_gene_models(dataset):
 
     pickle.dump(models, open(GENE_MODELS_FILE(dataset), 'wb'), protocol=-1)
 
+@lru_cache(maxsize=256)
 def load_gene_models(dataset):
     '''
     Returns gene models of the dataset, caching information along the way.
@@ -126,7 +142,9 @@ def load_gene_models(dataset):
 GENE_SET_DB = DATA_DIR + "/GeneSets.db"
 GENE_SET_GENE_TABLE = "GeneSet_Genes"
 GENE_SET_URL_TABLE = "GeneSet_URL"
-GENE_POPULARITY_FILE = lambda dataset: DATA_DIR + "/" + dataset + "/" + dataset + "_GenePopularity.pkl"
+
+GENE_POPULARITY_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+GENE_POPULARITY_FILE = lambda dataset: GENE_POPULARITY_DIR(dataset) + dataset + "_GenePopularity.pkl"
 '''Returns the path used to cache/uncache gene popularity for the given dataset'''
 
 def dump_gene_popularity(dataset):
@@ -137,6 +155,10 @@ def dump_gene_popularity(dataset):
     :param dataset: the name of the dataset downloading data from
     :type dataset: str
     '''
+
+    if not os.path.exists(GENE_POPULARITY_DIR(dataset)):
+        os.makedirs(GENE_POPULARITY_DIR(dataset))
+
     #get all genes in the dataset
     cursor = sqlite3.connect(EXPRESSION_PROFILE_DB(dataset)).cursor()
     table = EXPRESSION_PROFILE_DBTABLE(dataset)
@@ -156,6 +178,7 @@ def dump_gene_popularity(dataset):
     cursor.close()
     pickle.dump(gene_pop, open(GENE_POPULARITY_FILE(dataset), 'wb'), protocol=-1)
 
+@lru_cache(maxsize=256)
 def load_gene_popularity(dataset):
     '''
     Returns gene popularity data for the dataset, caching information along the way.
@@ -176,12 +199,17 @@ def load_gene_popularity(dataset):
 '''
 ****************************Gene Sets****************************
 '''
-GENE_SET_FILE = DATA_DIR + "/All_GeneSets.pkl"
+GENE_SET_DIR = DATA_DIR
+GENE_SET_FILE = GENE_SET_DIR + "/All_GeneSets.pkl"
 def dump_all_gene_sets():
     '''
     Queries the main gene_set database and dumps ALL gene sets in the form of a dict mapping the name
     of the gene set to a gene_set object
     '''
+
+    if not os.path.exists(GENE_SET_DIR):
+        os.makedirs(GENE_SET_DIR)
+
     cursor = sqlite3.connect(GENE_SET_DB).cursor()
     cursor.execute("Select Distinct GeneSet From " + GENE_SET_GENE_TABLE)
     sets = [set[0] for set in cursor.fetchall()]
@@ -198,6 +226,7 @@ def dump_all_gene_sets():
     cursor.close()
     pickle.dump(gene_sets, open(GENE_SET_FILE, 'wb'), protocol=-1)
 
+@lru_cache(maxsize=256)
 def load_all_gene_sets():
     '''
     Returns all stored gene sets, caching information along the way.
@@ -213,7 +242,8 @@ def load_all_gene_sets():
     dump_all_gene_sets()
     return load_all_gene_sets()
 
-FILTERED_GENE_SET_FILE = lambda dataset: DATA_DIR + "/" + dataset + "/" +  dataset + "_FilteredGeneSets.pkl"
+FILTERED_GENE_SET_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+FILTERED_GENE_SET_FILE = lambda dataset: FILTERED_GENE_SET_DIR(dataset) + dataset + "_FilteredGeneSets.pkl"
 '''Returns the path used to cache/uncache expression profiles for the given dataset'''
 def dump_filtered_gene_sets(dataset):
     '''
@@ -223,6 +253,9 @@ def dump_filtered_gene_sets(dataset):
     :param dataset: the name of the dataset downloading data from
     :type dataset: str
     '''
+
+    if not os.path.exists(FILTERED_GENE_SET_DIR(dataset)):
+        os.makedirs(FILTERED_GENE_SET_DIR(dataset))
 
     gene_sets = load_all_gene_sets()
 
@@ -239,6 +272,7 @@ def dump_filtered_gene_sets(dataset):
 
     pickle.dump(filtered_sets, open(FILTERED_GENE_SET_FILE(dataset), 'wb'), protocol=-1)
 
+@lru_cache(maxsize=256)
 def load_filtered_gene_sets(dataset):
     '''
     Returns gene sets valid for the given dataset, caching information along the way.
@@ -263,6 +297,10 @@ def dump_BC_clinical_profiles():
     '''
     Queries the BC database to download and dump a dict mapping patient id to clinical_profiles
     '''
+
+    if not os.path.exists(BC_CLINICAL_PROFILES_FILE):
+        os.makedirs(BC_CLINICAL_PROFILES_FILE)
+
     cursor = sqlite3.connect(BC_CLINICAL_DB).cursor()
     cursor.execute("Select * From BC_ClinicalData")
     rows = cursor.fetchall()
@@ -293,6 +331,7 @@ def dump_BC_clinical_profiles():
 
     pickle.dump(profiles, open(BC_CLINICAL_PROFILES_FILE, 'wb'), protocol=-1)
 
+@lru_cache(maxsize=256)
 def load_BC_clinical_profiles():
     '''
     Returns clinical profiles for the BC set, caching information along the way.
@@ -310,8 +349,9 @@ def load_BC_clinical_profiles():
 '''
 ****************************Picking best models****************************
 '''
-BEST_MODELS_FILE = lambda dataset, bins, genes: \
-    DATA_DIR + "/" + dataset + "/" + dataset + "_BestModels_BINS_" + str(bins) + "_GENES_" + str(genes) + ".pkl"
+BEST_MODELS_DIR = lambda dataset, bins, genes: DATA_DIR + "/" + dataset + "/" + genes + "_Models/"
+BEST_MODELS_FILE = lambda dataset, bins, genes: BEST_MODELS_DIR(dataset, bins, genes) + dataset + "_BestModels_BINS_" \
+                                                + str(bins) + "_GENES_" + str(genes) + ".pkl"
 '''Returns the path used to cache/uncache gene popularity for the given dataset'''
 import heapq
 from master_selection import calculate_prior
@@ -322,6 +362,8 @@ def dump_best_models(dataset, num_bins, genes_per_bin):
 
     ToDo: figure out a way to write this better
     """
+    if not os.path.exists(BEST_MODELS_DIR(dataset, num_bins, genes_per_bin)):
+        os.makedirs(BEST_MODELS_DIR(dataset, num_bins, genes_per_bin))
 
     gene_models = load_gene_models(dataset)
     popularity = load_gene_popularity(dataset)
@@ -356,8 +398,9 @@ def dump_best_models(dataset, num_bins, genes_per_bin):
         for gene in best_genes:
             best_models[gene] = bin[gene]
 
-    pickle.dump(best_models, open(BEST_MODELS_FILE("BC", num_bins, genes_per_bin), 'wb'), protocol=-1)
+    pickle.dump(best_models, open(BEST_MODELS_FILE(dataset, num_bins, genes_per_bin), 'wb'), protocol=-1)
 
+@lru_cache(maxsize=256)
 def load_best_models(dataset, num_bins, genes_per_bin):
     '''
     Returns the best genes for the given dataset, caching information along the way.
@@ -385,8 +428,10 @@ def load_best_models(dataset, num_bins, genes_per_bin):
 '''
 ****************************Simulating Phenotypes****************************
 '''
-PHENOTYPE_SIMS_FILE = lambda dataset, n, master_gene: DATA_DIR + "/" + dataset + "/" + dataset + "_SimPheno_" \
-                                                        + "Gene_" + str(master_gene) + "_N_" + str(n) + ".pkl"
+PHENOTYPE_SIMS_DIR  = lambda dataset, n, master_gene: DATA_DIR + "/" + dataset + "/SimPhenotypes/" + master_gene + "/"
+
+PHENOTYPE_SIMS_FILE = lambda dataset, n, master_gene: PHENOTYPE_SIMS_DIR(dataset, n, master_gene) + \
+                        dataset + "_SimPheno_" + "Gene_" + str(master_gene) + "_N_" + str(n) + ".pkl"
 '''Returns the path used to cache/uncache gene popularity for the given dataset'''
 from simulation import simulate_data
 def dump_sim_phenotypes(dataset, n, master_gene):
@@ -408,6 +453,9 @@ def dump_sim_phenotypes(dataset, n, master_gene):
     :type master_gene: str
     '''
 
+    if not os.path.exists(PHENOTYPE_SIMS_DIR(dataset, n, master_gene)):
+        os.makedirs(PHENOTYPE_SIMS_DIR(dataset, n, master_gene))
+
     models = load_gene_models(dataset)
     samples = load_sample_profiles(dataset)
 
@@ -419,6 +467,7 @@ def dump_sim_phenotypes(dataset, n, master_gene):
 
     pickle.dump(data_sets, open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'wb'))
 
+@lru_cache(maxsize=256)
 def load_sim_phenotypes(dataset, n, master_gene):
     '''
     Returns the a set of n simulated phenotypes using the given mastergene, caching data along the way
@@ -443,7 +492,9 @@ def load_sim_phenotypes(dataset, n, master_gene):
 '''
 ****************************ssGSEA Phenotypes****************************
 '''
-ssGSEA_SCORES_FILES = lambda dataset: DATA_DIR + "/" + dataset + "/" + dataset + "_ssGSEAScores.pkl"
+ssGSEA_SCORES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+
+ssGSEA_SCORES_FILES = lambda dataset: ssGSEA_SCORES_DIR(dataset) + dataset + "_ssGSEAScores.pkl"
 '''Returns the path used to cache/uncache gene enrichment scores per id'''
 from ssGSEA import calculate_enrichment_score
 def dump_ssGSEA_scores(dataset):
@@ -454,6 +505,9 @@ def dump_ssGSEA_scores(dataset):
     :param dataset: the dataset from which to reference data from
     :type dataset: str
     """
+    if not os.path.exists(ssGSEA_SCORES_DIR(dataset)):
+        os.makedirs(ssGSEA_SCORES_DIR(dataset))
+
     gene_sets = load_filtered_gene_sets(dataset)
     samples = load_sample_profiles(dataset)
 
@@ -471,6 +525,7 @@ def dump_ssGSEA_scores(dataset):
             for gene in profile.keys():
                 expressions[gene] = profile[gene].intensity
 
+            #ToDo: change weight parameter?
             score = calculate_enrichment_score(gene_set, expressions, 0.25)
 
             #ToDo: normalize scores?
@@ -481,6 +536,7 @@ def dump_ssGSEA_scores(dataset):
 
     pickle.dump(paths, open(ssGSEA_SCORES_FILES(dataset), 'wb'))
 
+@lru_cache(maxsize=256)
 def load_ssGSEA_scores(dataset):
     '''
     Returns a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set

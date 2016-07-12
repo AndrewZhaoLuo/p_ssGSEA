@@ -1,0 +1,7 @@
+analyze_enrichment module
+=========================
+
+.. automodule:: analyze_enrichment
+    :members:
+    :undoc-members:
+    :show-inheritance:

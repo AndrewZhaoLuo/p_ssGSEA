@@ -130,37 +130,6 @@
 
     <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_enriched_set_models.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="get_model_scores"><a class="viewcode-back" href="../ssGSEA.html#ssGSEA.get_model_scores">[docs]</a><span class="k">def</span> <span class="nf">get_model_scores</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ToDo: move to caching</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">gene_sets</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_good_gene_sets.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-    <span class="n">samples</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_sample_profiles.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Data loaded!&quot;</span><span class="p">)</span>
-
-    <span class="n">paths</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1">#for each gene set</span>
-    <span class="k">for</span> <span class="nb">set</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="p">:</span>
-        <span class="n">gene_set</span> <span class="o">=</span> <span class="nb">set</span><span class="o">.</span><span class="n">genes</span>
-
-        <span class="c1">#go through all the samples and calculate the ES</span>
-        <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">samples</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">profile</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">profiles</span>
-            <span class="n">expressions</span> <span class="o">=</span> <span class="p">{}</span>
-
-            <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">profile</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">expressions</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span> <span class="o">=</span> <span class="n">profile</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span><span class="o">.</span><span class="n">intensity</span>
-
-            <span class="n">score</span> <span class="o">=</span> <span class="n">calculate_enrichment_score</span><span class="p">(</span><span class="n">gene_set</span><span class="p">,</span> <span class="n">expressions</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
-            <span class="n">scores</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
-
-        <span class="n">paths</span><span class="p">[</span><span class="nb">set</span><span class="o">.</span><span class="n">set_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">scores</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;1 set done enriched scores!&quot;</span><span class="p">)</span>
-
-    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;BC_ssgsea_scores.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span></div>
-
-
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">ToDo: make extensible and reusable</span>
 
