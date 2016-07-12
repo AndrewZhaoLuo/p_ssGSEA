@@ -3,6 +3,7 @@ Contains methods to fit gene expression to mixed gaussian model using the Expect
 '''
 
 from sklearn.mixture import GMM
+import cache_codec
 
 def fit_test_model(x):
     """
@@ -66,3 +67,30 @@ def get_trained_models(gene_profiles):
         genes.append(gene_sample)
 
     return models
+
+if __name__ == "__main__":
+
+    file = open("./6-12-16Analysis/genes", 'r')
+    genes = file.read().split('\n')
+
+    '''
+    #code given master gene, prints out graph of
+    #generated class0/1 phenotype profiles
+    MASTER_GENE = "CLIC3"
+
+    gene_sets = cache_codec.load_all_gene_sets()
+    enrichment_scores = cache_codec.load_ssGSEA_scores("BC")
+
+    phenotypes = cache_codec.load_sim_phenotypes("BC", 10, MASTER_GENE)
+
+    model = cache_codec.load_gene_models("BC")[MASTER_GENE]
+    good_sets = [sets for sets in enrichment_scores.keys() if MASTER_GENE in gene_sets[sets].genes]
+
+    import Extra_Modules.gaussian_sampling
+    import analyze_enrichment
+    for set in good_sets:
+        class0, class1 = analyze_enrichment.analyze_phenotype_score_dist(enrichment_scores, phenotypes[0], set)
+        print(class0)
+        print(class1)
+        Extra_Modules.gaussian_sampling.plot_multidist_from_values(MASTER_GENE + "_" + set,[class0, class1])
+    '''

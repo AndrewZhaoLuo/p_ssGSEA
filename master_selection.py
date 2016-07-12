@@ -144,6 +144,22 @@ def calculate_bayes_error(model):
 
     return err #/ (norm.sf(-10000, loc=mus[0], scale=sigmas[0]) + norm.sf(-10000, loc=mus[1], scale=sigmas[1]) - err)
 
+def calculate_populairity(gene, gene_sets):
+    '''
+    Returns the popularity of the given gene with respect to the given gene_sets. This is the number of times the
+    gene appears in the given gene_sets
+
+    :param gene: the gene to check the popularity of
+    :type gene: str
+
+    :param gene_sets: a map of gene_set names to gene_set objects
+    :type: dict
+
+    :returns: the number of times the gene appears in the given gene set
+    '''
+
+    return sum([1 for key in gene_sets.keys() if gene in gene_sets[key].genes])
+
 def calculate_fold_change(model):
     """
     Returns the fold change of the given mixture model
