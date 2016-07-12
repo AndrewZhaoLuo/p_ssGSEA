@@ -89,6 +89,9 @@ def create_GeneSet_schema_sets(cursor):
         (GeneSet text, Gene text)''')
 
 def load_BC_data_sets(cursor):
+    if not os.path.exists(BC_DB_BASE_DIR):
+        os.makedirs(BC_DB_BASE_DIR)
+
     gene_sets = GS.readAllGeneSets(GS.GENE_SETS_DIR)
     for set in gene_sets:
         set_name = set.set_name
@@ -102,6 +105,9 @@ def load_BC_data_sets(cursor):
                            (set_name, gene))
 
 def create_GeneSet_db():
+    if not os.path.exists(GENE_SET_DB):
+        os.makedirs(GENE_SET_DB)
+
     cursor = sqlite3.connect(GENE_SET_DB)
 
     create_GeneSet_schema_sets(cursor)
