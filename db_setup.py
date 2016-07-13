@@ -119,6 +119,10 @@ def create_GeneSet_db():
 if __name__ == "__main__":
     import timeit
 
+    #first create all directories
+    if not os.path.exists(BC_DB_BASE_DIR):
+        os.makedirs(BC_DB_BASE_DIR)
+
     print("Building expression db!")
     start = timeit.default_timer()
     create_BC_Expression_db()
