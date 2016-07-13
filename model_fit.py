@@ -70,15 +70,30 @@ def get_trained_models(gene_profiles):
 
 if __name__ == "__main__":
 
+    '''
+    import master_selection
+
     file = open("./6-12-16Analysis/genes", 'r')
     genes = file.read().split('\n')
 
+    out = open("pops", 'w')
+    for gene in genes:
+        pop = master_selection.calculate_populairity(gene, cache_codec.load_filtered_gene_sets("BC"))
+        out.write(gene + "\t" + str(pop) + "\n")
+
+    for set in cache_codec.load_filtered_gene_sets("BC"):
+        if "ERBB2" in cache_codec.load_filtered_gene_sets("BC")[set].genes:
+            print("\t" + set)
+        if "SMID_BREAST_CANCER_ERBB2_DN" == set:
+            print(cache_codec.load_filtered_gene_sets("BC")[set].genes)
     '''
+
+
     #code given master gene, prints out graph of
     #generated class0/1 phenotype profiles
     MASTER_GENE = "CLIC3"
 
-    gene_sets = cache_codec.load_all_gene_sets()
+    gene_sets = cache_codec.load_filtered_gene_sets("BC")
     enrichment_scores = cache_codec.load_ssGSEA_scores("BC")
 
     phenotypes = cache_codec.load_sim_phenotypes("BC", 10, MASTER_GENE)
@@ -93,4 +108,4 @@ if __name__ == "__main__":
         print(class0)
         print(class1)
         Extra_Modules.gaussian_sampling.plot_multidist_from_values(MASTER_GENE + "_" + set,[class0, class1])
-    '''
+

@@ -484,7 +484,8 @@ def dump_sim_phenotypes(dataset, n, master_gene):
 
     pickle.dump(data_sets, open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'wb'))
 
-@memorize
+#breaks multithreading -> messes up their pickling
+#@memorize
 def load_sim_phenotypes(dataset, n, master_gene):
     '''
     Returns the a set of n simulated phenotypes using the given mastergene, caching data along the way
@@ -506,6 +507,11 @@ def load_sim_phenotypes(dataset, n, master_gene):
     dump_sim_phenotypes(dataset, n, master_gene)
     return load_sim_phenotypes(dataset, n, master_gene)
 
+def load_sim_phenotype_keyed(dataset, n, master_gene):
+    '''
+    As above, but returns as entry in dict with key as master_gene
+    '''
+    return {master_gene: load_sim_phenotypes(dataset, n, master_gene)}
 '''
 ****************************ssGSEA Phenotypes****************************
 '''

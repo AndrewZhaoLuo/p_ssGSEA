@@ -54,6 +54,7 @@ def rank_by_t_test(enrichment_scores, phenotypes):
 
     :returns: a list of maps, mapping gene_sets to a tuple of representing t-score and p-value
     '''
+    print("tic")
     gene_sets = enrichment_scores.keys()
 
     rankings = []
@@ -67,6 +68,9 @@ def rank_by_t_test(enrichment_scores, phenotypes):
         rankings.append(scores)
 
     return rankings
+
+def rank_by_t_test_keyed(enrichment_scores, phenotypes, master_gene):
+    return {master_gene: rank_by_t_test(enrichment_scores, phenotypes)}
 
 def evaluate_rankings(rankings, gene_sets, master_gene):
     '''
@@ -88,7 +92,6 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
     :returns: a list, with each element being the "score" calculated on the ranking of the master_gene in the given \
     rankings
     '''
-
     def linear_method(ranking):
         # parse gene_sets in order from high tstat to low
         sorted_sets = sorted(ranking, key=ranking.get, reverse=True)
@@ -127,6 +130,13 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
                 master_gene_ranks.append(i)
 
     return master_gene_ranks
+
+def evaluate_rankings_keyed(rankings, gene_sets, master_gene):
+    '''
+    As above, but returns the value keyed to the master_gene
+    '''
+
+    return {master_gene: evaluate_rankings(rankings, gene_sets, master_gene)}
 
 
 
