@@ -78,8 +78,9 @@ def create_BC_Clinical_db():
 
 '''
 GENE_SET DATABASE
-'''
-GENE_SET_DB = "./Data/AppCache/GeneSets.db"
+''' 
+GENE_SET_DIR = "./Data/AppCache/"
+GENE_SET_DB = GENE_SET_DIR + "GeneSets.db"
 
 def create_GeneSet_schema_sets(cursor):
     cursor.execute('''CREATE TABLE GeneSet_URL
@@ -105,8 +106,8 @@ def load_BC_data_sets(cursor):
                            (set_name, gene))
 
 def create_GeneSet_db():
-    if not os.path.exists(GENE_SET_DB):
-        os.makedirs(GENE_SET_DB)
+    if not os.path.exists(GENE_SET_DIR):
+        os.makedirs(GENE_SET_DIR)
 
     cursor = sqlite3.connect(GENE_SET_DB)
 
