@@ -211,7 +211,7 @@ def load_gene_popularity(dataset):
 
     print("\tCalculating and saving gene popularities")
     dump_gene_popularity(dataset)
-    return load_gene_popularity()
+    return load_gene_popularity(dataset)
 
 '''
 ****************************Gene Sets****************************
