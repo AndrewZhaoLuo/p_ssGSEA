@@ -282,9 +282,10 @@ def dump_filtered_gene_sets(dataset):
 
     filtered_sets = {}
     for set_name in gene_sets:
+        print("Examining set: " + set_name)
         cur_set = gene_sets[set_name]
         new_genes = {gene for gene in cur_set.genes if gene in valid_genes}
-        if len(new_genes) == len(cur_set.genes):
+        if len(new_genes) > 0:
             filtered_sets[set_name] = gene_set(set_name, cur_set.url, new_genes)
 
     pickle.dump(filtered_sets, open(FILTERED_GENE_SET_FILE(dataset), 'wb'), protocol=-1)
