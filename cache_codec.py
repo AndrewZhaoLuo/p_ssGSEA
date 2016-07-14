@@ -579,4 +579,6 @@ def load_ssGSEA_scores(dataset):
     return load_ssGSEA_scores(dataset)
 
 if __name__ == "__main__":
-    g = load_ssGSEA_scores("BC")
+    g = load_sample_profiles("BC")
+    print(g[4].profiles.keys())
+

@@ -3,7 +3,6 @@ Contains methods to fit gene expression to mixed gaussian model using the Expect
 '''
 
 from sklearn.mixture import GMM
-import cache_codec
 
 def fit_test_model(x):
     """
@@ -88,7 +87,7 @@ if __name__ == "__main__":
             print(cache_codec.load_filtered_gene_sets("BC")[set].genes)
     '''
 
-
+    import cache_codec
     #code given master gene, prints out graph of
     #generated class0/1 phenotype profiles
     MASTER_GENE = "CLIC3"
