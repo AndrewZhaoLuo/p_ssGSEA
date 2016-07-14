@@ -54,9 +54,7 @@ def get_trained_models(gene_profiles):
     print("\tTraining model for every gene...")
     i = 0
     models = {}
-    count = counter()
     for gene in gene_profiles.keys():
-        print("\t\t" + count)
         expressions = [[exp] for exp in gene_profiles[gene]]
         models[gene] = fit_test_model(expressions)
 
