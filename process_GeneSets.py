@@ -32,7 +32,8 @@ def readtGeneSetData(file_name):
 
         genes = []
         for i in range(2, len(set_info)):
-            genes.append(set_info[i])
+            #sanitize by removing / which can cause directory errors
+            genes.append(set_info[i].replace("/", "-"))
 
         gene_sets.append(gene_set(set_name, set_url, genes))
 

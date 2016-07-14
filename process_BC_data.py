@@ -67,7 +67,9 @@ def readExpressionProfile(file_name):
         fields = row.split("\t")
 
         substance = fields[0]
-        gene = fields[1]
+
+        #sanitize / to prevent issues with directories being created
+        gene = fields[1].replace('/', '-')
 
         #start from two, which is the index of the first column with actual information
         #5 fields, so offset by 5 with each id

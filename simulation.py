@@ -85,33 +85,9 @@ def simulate_data(models, master_gene_name, sample_profiles, n):
 
     return classifications
 if __name__ == "__main__":
-    data_sets = pickle.load(open("BC_simulated_phenotypes2.pkl", 'rb'))
-
-    #maps id -> number of times phenotype 0/1 appear
-    count0 = {}
-    count1 = {}
-
-    #initializae map
-    for key in data_sets[0].keys():
-        count0[key] = 0
-        count1[key] = 0
-
-    for i in range(0, len(data_sets)):
-        set = data_sets[i]
-        for key in set.keys():
-            if set[key] == 0:
-                count0[key] += 1
-            else:
-                count1[key] += 1
-
-    #find a sort by class imbalance
-    diffRatio = {}
-    for key in data_sets[0].keys():
-        diffRatio[key] = abs(count0[key] - count1[key])
-
-    sorted_keys = sorted(diffRatio, key=diffRatio.get)
-    print("key\t\tclass_0\tclass_1")
-    for key in sorted_keys:
-        print(str(key) + "\t\t" + str(count0[key]) + "\t\t" + str(count1[key]))
+    import cache_codec
+    phenos = cache_codec.load_sim_phenotypes("BC", 100, "ERBB2")
+    print(phenos)
+    print(phenos[0])
 
 
