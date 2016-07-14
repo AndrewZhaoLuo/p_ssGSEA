@@ -200,7 +200,7 @@ def dump_gene_popularity(dataset):
     gene_names = [row[0] for row in rows]
 
     #then query gene set db for popularity
-    count = counter
+    count = counter()
     cursor = sqlite3.connect(GENE_SET_DB).cursor()
     gene_pop = {}
     for names in gene_names:
