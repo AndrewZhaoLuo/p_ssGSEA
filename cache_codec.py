@@ -25,6 +25,14 @@ class memorize(dict):
         result = self[key] = self.func(*key)
         return result
 
+class counter():
+    def __init(self):
+        self.i = 0
+
+    def __str__(self):
+        self.i += 1
+        return str(self.i)
+
 
 #to do: pick better policy/write own
 #from functools import lru_cache
@@ -62,8 +70,11 @@ def dump_sample_profiles(dataset):
     rows = cursor.fetchall()
     sample_nums = [row[0] for row in rows]
 
+    count = counter()
+
     samples = {}
     for num in sample_nums:
+        print("\t\t" + count)
         #get all gene profiles from each profile
         cursor.execute("Select Sample, Gene, Intensity From " + table + " WHERE Sample='%s' AND Gene != ''" % num)
         sample_profiles = cursor.fetchall()
@@ -186,9 +197,11 @@ def dump_gene_popularity(dataset):
     gene_names = [row[0] for row in rows]
 
     #then query gene set db for popularity
+    count = counter
     cursor = sqlite3.connect(GENE_SET_DB).cursor()
     gene_pop = {}
     for names in gene_names:
+        print("\t\t" + count)
         cursor.execute("Select GeneSet From " + GENE_SET_GENE_TABLE + " WHERE Gene='%s'" % names)
         gene_pop[names] = len(cursor.fetchall())
 
@@ -232,7 +245,9 @@ def dump_all_gene_sets():
     sets = [set[0] for set in cursor.fetchall()]
 
     gene_sets = {}
+    count = counter()
     for set in sets:
+        print("\t\t" + count)
         cursor.execute("Select Distinct Gene From " + GENE_SET_GENE_TABLE + " WHERE GeneSet='%s'" % set)
         genes = {x[0] for x in cursor.fetchall()}
         cursor.execute("Select Distinct URL From " + GENE_SET_URL_TABLE + " WHERE GeneSet='%s'" % set)
@@ -281,7 +296,9 @@ def dump_filtered_gene_sets(dataset):
     valid_genes = samples[keys[0]].profiles.keys()
 
     filtered_sets = {}
+    count = counter()
     for set_name in gene_sets:
+        print("\t\t" + count)
         print("Examining set: " + set_name)
         cur_set = gene_sets[set_name]
         new_genes = {gene for gene in cur_set.genes if gene in valid_genes}
@@ -478,9 +495,10 @@ def dump_sim_phenotypes(dataset, n, master_gene):
     samples = load_sample_profiles(dataset)
 
     data_sets = []
-
+    count = counter()
     for i in range(0, n):
-        labels = simulate_data(models, "ERBB2", [samples[key] for key in samples.keys()], len(samples))
+        print("\t\t" + count)
+        labels = simulate_data(models, master_gene, [samples[key] for key in samples.keys()], len(samples))
         data_sets.append(labels)
 
     pickle.dump(data_sets, open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'wb'))
@@ -537,7 +555,9 @@ def dump_ssGSEA_scores(dataset):
 
     paths = {}
     #for each gene set
+    count = counter()
     for set in gene_sets.keys():
+        print("\t\t" + count)
         gene_set = gene_sets[set].genes
 
         #go through all the samples and calculate the ES
