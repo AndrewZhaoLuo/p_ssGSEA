@@ -29,8 +29,11 @@ class counter():
     def __init__(self):
         self.i = 0
 
-    def __str__(self):
+    def count(self):
         self.i += 1
+        return str(self.i)
+
+    def __str__(self):
         return str(self.i)
 
 
@@ -74,7 +77,7 @@ def dump_sample_profiles(dataset):
 
     samples = {}
     for num in sample_nums:
-        print("\t\t" + str(count))
+        print("\t\t" + str(count.count()))
         #get all gene profiles from each profile
         cursor.execute("Select Sample, Gene, Intensity From " + table + " WHERE Sample='%s' AND Gene != ''" % num)
         sample_profiles = cursor.fetchall()
@@ -201,7 +204,7 @@ def dump_gene_popularity(dataset):
     cursor = sqlite3.connect(GENE_SET_DB).cursor()
     gene_pop = {}
     for names in gene_names:
-        print("\t\t" + str(count))
+        print("\t\t" + str(count.count()))
         cursor.execute("Select GeneSet From " + GENE_SET_GENE_TABLE + " WHERE Gene='%s'" % names)
         gene_pop[names] = len(cursor.fetchall())
 
@@ -247,7 +250,7 @@ def dump_all_gene_sets():
     gene_sets = {}
     count = counter()
     for set in sets:
-        print("\t\t" + str(count))
+        print("\t\t" + str(count.count()))
         cursor.execute("Select Distinct Gene From " + GENE_SET_GENE_TABLE + " WHERE GeneSet='%s'" % set)
         genes = {x[0] for x in cursor.fetchall()}
         cursor.execute("Select Distinct URL From " + GENE_SET_URL_TABLE + " WHERE GeneSet='%s'" % set)
@@ -298,7 +301,7 @@ def dump_filtered_gene_sets(dataset):
     filtered_sets = {}
     count = counter()
     for set_name in gene_sets:
-        print("\t\t" + str(count))
+        print("\t\t" + str(count.count()))
         print("Examining set: " + set_name)
         cur_set = gene_sets[set_name]
         new_genes = {gene for gene in cur_set.genes if gene in valid_genes}
@@ -497,7 +500,7 @@ def dump_sim_phenotypes(dataset, n, master_gene):
     data_sets = []
     count = counter()
     for i in range(0, n):
-        print("\t\t" + str(count))
+        print("\t\t" + str(count.count()))
         labels = simulate_data(models, master_gene, [samples[key] for key in samples.keys()], len(samples))
         data_sets.append(labels)
 
@@ -557,7 +560,7 @@ def dump_ssGSEA_scores(dataset):
     #for each gene set
     count = counter()
     for set in gene_sets.keys():
-        print("\t\t" + str(count))
+        print("\t\t" + str(count.count()))
         gene_set = gene_sets[set].genes
 
         #go through all the samples and calculate the ES
