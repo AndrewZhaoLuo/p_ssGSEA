@@ -15,9 +15,11 @@ from cache_codec import load_filtered_gene_sets
 from analyze_enrichment import rank_by_t_test_keyed
 from analyze_enrichment import evaluate_rankings_keyed
 
+import numpy.random as random
+
 NUM_PROCESSES = 4
 
-def run_analysis_on_dataset(data_set, n):
+def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     '''
     Given data_set, and n which is the number of replicates for the experiment:
     for every gene in the data_set for which there exists a filtered gene set, creates imaginary phenotypes for every
@@ -39,7 +41,7 @@ def run_analysis_on_dataset(data_set, n):
     good_genes = []
     for master_gene in master_genes:
         #ToDo: pre-entry sanitation of the database!
-        if "/" not in master_gene:
+        if gene_options == 'all' or master_gene in gene_options:
             good_genes.append(master_gene)
 
     #fast and threaded!!!
@@ -53,7 +55,7 @@ def run_analysis_on_dataset(data_set, n):
     pheno_map = {}
     for map in loaded_phenos:
         for key in map.keys():
-            pheno_map[key] = map[key]
+            pheno_map[key] = random.permutation(map[key])[0:pheno_sample]
 
     #work out the enrichment_score ranks
     enrichment_list = pool.starmap(rank_by_t_test_keyed, [(enrichment_scores, pheno_map[gene], gene) for gene in good_genes])
@@ -98,7 +100,7 @@ if __name__ == "__main__":
     #run algo
     import timeit
     start = timeit.default_timer()
-    run_analysis_on_dataset("BC", 10)
+    run_analysis_on_dataset("BC", 10, 100)
     end = timeit.default_timer()
 
     #reset output to terminal and print results!
