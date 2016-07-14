@@ -49,22 +49,37 @@ hHigh = beta(2,0.5)
 
 
 ########################################
-dat1 = [0.005, 0.007, 0.008, 0.002, 0.001, 0.004]
 
-p1 = 0.333 # h1
-p2 = 0.333 # h2
-p3 = 0.333 # h3
+def pmodel(dat1, priors, mode):
 
-for di in dat1:
-    p1 = p1 * hLow.sf(di)
-    p2 = p2 * min(hMid.sf(di), hMid.cdf(di)) * 2.0
-    p3 = p3 * hHigh.cdf(di)
+    from scipy.stats import beta
+    import numpy as np
 
-ptot = p1+p2+p3
-p1 /= ptot
-p2 /= ptot
-p3 /= ptot
-print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
+    hLow = beta(0.5,2)
+    hMid = beta(2,2)
+    hHigh = beta(2,0.5)
+
+    p1 = priors[0] # h1
+    p2 = priors[1] # h2
+    p3 = priors[2] # h3
+
+    for di in dat1:
+        p1 = p1 * hLow.sf(di)
+        p2 = p2 * min(hMid.sf(di), hMid.cdf(di)) * 2.0
+        p3 = p3 * hHigh.cdf(di)
+
+        ptot = p1+p2+p3
+        p1 /= ptot
+        p2 /= ptot
+        p3 /= ptot
+        print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
+
+    if mode == 'high':
+        return(p3)
+    elif mode == 'low':
+        return(p1)
+    else:
+        return(max(p1,p3))
 
 
 ########################################
