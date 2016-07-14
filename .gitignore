@@ -1,0 +1,28 @@
+#ignore output
+stdout.txt
+
+#ignore virtual enviroment
+venv/
+
+#don't download data fools!
+Data/
+OldPickle/
+__pycache__/
+
+#make your own pictures!
+Pictures/
+
+#Only output documentation
+Doc/
+
+#don't download bundled data (package your own!)
+*.db
+*.pkl
+
+#ignore pictures (make your own!)
+*.jpg
+*.png
+
+#ignore temporary and compiled files
+*~
+*pyc
