@@ -379,7 +379,7 @@ def load_BC_clinical_profiles():
 '''
 ****************************Picking best models****************************
 '''
-BEST_MODELS_DIR = lambda dataset, bins, genes: DATA_DIR + "/" + dataset + "/" + genes + "_Models/"
+BEST_MODELS_DIR = lambda dataset, bins, genes: DATA_DIR + "/" + dataset + "/" + str(genes) + "_Models/"
 BEST_MODELS_FILE = lambda dataset, bins, genes: BEST_MODELS_DIR(dataset, bins, genes) + dataset + "_BestModels_BINS_" \
                                                 + str(bins) + "_GENES_" + str(genes) + ".pkl"
 '''Returns the path used to cache/uncache gene popularity for the given dataset'''
