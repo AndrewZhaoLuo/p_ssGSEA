@@ -379,7 +379,7 @@ def load_BC_clinical_profiles():
 '''
 ****************************Picking best models****************************
 '''
-BEST_MODELS_DIR = lambda dataset, bins, genes: DATA_DIR + "/" + dataset + "/" + str(genes) + "_Models/"
+BEST_MODELS_DIR = lambda dataset, bins, genes: DATA_DIR + "/" + dataset + "/"
 BEST_MODELS_FILE = lambda dataset, bins, genes: BEST_MODELS_DIR(dataset, bins, genes) + dataset + "_BestModels_BINS_" \
                                                 + str(bins) + "_GENES_" + str(genes) + ".pkl"
 '''Returns the path used to cache/uncache gene popularity for the given dataset'''
@@ -427,9 +427,10 @@ def dump_best_models(dataset, num_bins, genes_per_bin):
     best_models = {}
     for bin in bins:
         best_genes = heapq.nsmallest(genes_per_bin, bin, key=bin.get)
-        for i in range(0, 10):
-            best_models[best_genes[i]] = bin[best_genes[i]]
+        for best_gene in best_genes:
+            best_models[best_gene] = gene_models[best_gene]
 
+    print(best_models)
     pickle.dump(best_models, open(BEST_MODELS_FILE(dataset, num_bins, genes_per_bin), 'wb'), protocol=-1)
 
 @lru_cache(maxsize=16)
