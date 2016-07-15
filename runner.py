@@ -15,9 +15,10 @@ from cache_codec import load_filtered_gene_sets
 from analyze_enrichment import rank_by_t_test_keyed
 from analyze_enrichment import evaluate_rankings_keyed
 
-import numpy.random as random
+import numpy.random as nrandom
+import random
 
-NUM_PROCESSES = 4
+NUM_PROCESSES = 8
 
 def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     '''
@@ -40,7 +41,6 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
 
     good_genes = []
     for master_gene in master_genes:
-        #ToDo: pre-entry sanitation of the database!
         if gene_options == 'all' or master_gene in gene_options:
             good_genes.append(master_gene)
 
@@ -55,8 +55,14 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     pheno_map = {}
     for map in loaded_phenos:
         for key in map.keys():
-            pheno_map[key] = random.permutation(map[key])[0:pheno_sample]
+            sampled_pheno_map = []
+            for phenotype in map[key]:
+                sampled_keys = random.sample(phenotype.keys(), pheno_sample)
+                sampled_map = {id: phenotype[id] for id in sampled_keys}
+                sampled_pheno_map.append(sampled_map)
 
+            pheno_map[key] = sampled_pheno_map
+            
     #work out the enrichment_score ranks
     enrichment_list = pool.starmap(rank_by_t_test_keyed, [(enrichment_scores, pheno_map[gene], gene) for gene in good_genes])
     enrichment_map = {}
@@ -100,7 +106,7 @@ if __name__ == "__main__":
     #run algo
     import timeit
     start = timeit.default_timer()
-    run_analysis_on_dataset("BC", 10, 100)
+    run_analysis_on_dataset("BC", 100, 100, gene_options=["ERBB2"])
     end = timeit.default_timer()
 
     #reset output to terminal and print results!
