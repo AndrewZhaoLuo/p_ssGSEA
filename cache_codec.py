@@ -135,7 +135,7 @@ def dump_gene_models(dataset):
 
     pickle.dump(models, open(GENE_MODELS_FILE(dataset), 'wb'), protocol=-1)
 
-@lru_cache
+@lru_cache(maxsize=16)
 def load_gene_models(dataset):
     '''
     Returns gene models of the dataset, caching information along the way.
@@ -199,7 +199,7 @@ def dump_gene_popularity(dataset):
     cursor.close()
     pickle.dump(gene_pop, open(GENE_POPULARITY_FILE(dataset), 'wb'), protocol=-1)
 
-@lru_cache
+@lru_cache(maxsize=16)
 def load_gene_popularity(dataset):
     '''
     Returns gene popularity data for the dataset, caching information along the way.
@@ -249,7 +249,7 @@ def dump_all_gene_sets():
     cursor.close()
     pickle.dump(gene_sets, open(GENE_SET_FILE, 'wb'), protocol=-1)
 
-@lru_cache
+@lru_cache(maxsize=16)
 def load_all_gene_sets():
     '''
     Returns all stored gene sets, caching information along the way.
@@ -298,7 +298,7 @@ def dump_filtered_gene_sets(dataset):
 
     pickle.dump(filtered_sets, open(FILTERED_GENE_SET_FILE(dataset), 'wb'), protocol=-1)
 
-@lru_cache
+@lru_cache(maxsize=16)
 def load_filtered_gene_sets(dataset):
     '''
     Returns gene sets valid for the given dataset, caching information along the way.
@@ -360,7 +360,7 @@ def dump_BC_clinical_profiles():
 
     pickle.dump(profiles, open(BC_CLINICAL_PROFILES_FILE, 'wb'), protocol=-1)
 
-@lru_cache
+@lru_cache(maxsize=16)
 def load_BC_clinical_profiles():
     '''
     Returns clinical profiles for the BC set, caching information along the way.
@@ -432,7 +432,7 @@ def dump_best_models(dataset, num_bins, genes_per_bin):
 
     pickle.dump(best_models, open(BEST_MODELS_FILE(dataset, num_bins, genes_per_bin), 'wb'), protocol=-1)
 
-@lru_cache
+@lru_cache(maxsize=16)
 def load_best_models(dataset, num_bins, genes_per_bin):
     '''
     Returns the best genes for the given dataset, caching information along the way.
@@ -502,7 +502,7 @@ def dump_sim_phenotypes(dataset, n, master_gene):
     pickle.dump(data_sets, open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'wb'))
 
 #breaks multithreading -> messes up their pickling
-#@lru_cache
+#@lru_cache(maxsize=16)
 def load_sim_phenotypes(dataset, n, master_gene):
     '''
     Returns the a set of n simulated phenotypes using the given mastergene, caching data along the way
@@ -579,7 +579,7 @@ def dump_ssGSEA_scores(dataset):
 
     pickle.dump(paths, open(ssGSEA_SCORES_FILES(dataset), 'wb'))
 
-@lru_cache
+@lru_cache(maxsize=16)
 def load_ssGSEA_scores(dataset):
     '''
     Returns a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set
