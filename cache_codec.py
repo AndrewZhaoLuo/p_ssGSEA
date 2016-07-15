@@ -78,7 +78,7 @@ def dump_sample_profiles(dataset):
 
     pickle.dump(samples, open(EXPRESSION_PROFILES_FILE(dataset), 'wb'), protocol=-1)
 
-@lru_cache(max_size=16)
+@lru_cache(maxsize=16)
 def load_sample_profiles(dataset):
     '''
     Returns expression data for the dataset, caching information along the way.
