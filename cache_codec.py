@@ -529,7 +529,7 @@ def load_sim_phenotype_keyed(dataset, n, master_gene):
     '''
     As above, but returns as entry in dict with key as master_gene
     '''
-    print("Loading phenotype: " + master_gene)
+
     return {master_gene: load_sim_phenotypes(dataset, n, master_gene)}
 '''
 ****************************ssGSEA Phenotypes****************************

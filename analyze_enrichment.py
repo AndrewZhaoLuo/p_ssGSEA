@@ -3,6 +3,7 @@ This file contains methods for analyzing phenotype and enrichment scores across 
 '''
 
 import scipy.stats as stats
+from cache_codec import counter
 
 def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
     '''
@@ -57,6 +58,7 @@ def rank_by_t_test(enrichment_scores, phenotypes):
     gene_sets = enrichment_scores.keys()
 
     rankings = []
+    count = counter()
     for trial in range(0, len(phenotypes)):
         phenotype = phenotypes[trial]
         scores = {}
@@ -65,6 +67,7 @@ def rank_by_t_test(enrichment_scores, phenotypes):
             tstat, pvalue = stats.ttest_ind(class0, class1, nan_policy='raise')
             scores[gene_set] = (abs(tstat), pvalue)
         rankings.append(scores)
+        print("Finished t test for trial " + count.count() + " out of " + str(len(phenotypes)))
 
     return rankings
 
@@ -72,7 +75,7 @@ def rank_by_t_test_keyed(enrichment_scores, phenotypes, master_gene):
     '''
     As above, but returns a map mapping master_gene to the results
     '''
-    print("\t\tRunning T-Test " + master_gene)
+    print("\tRunning T-Test " + master_gene)
     return {master_gene: rank_by_t_test(enrichment_scores, phenotypes)}
 
 def evaluate_rankings(rankings, gene_sets, master_gene):
@@ -138,7 +141,7 @@ def evaluate_rankings_keyed(rankings, gene_sets, master_gene):
     '''
     As above, but returns the value keyed to the master_gene
     '''
-    print("\t\tRanking gene " + master_gene)
+    print("\tRanking gene " + master_gene)
     return {master_gene: evaluate_rankings(rankings, gene_sets, master_gene)}
 
 
