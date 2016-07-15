@@ -11,6 +11,7 @@ from cache_codec import load_sim_phenotype_keyed
 from cache_codec import load_gene_popularity
 from cache_codec import load_ssGSEA_scores
 from cache_codec import load_filtered_gene_sets
+from cache_codec import load_best_models
 
 from analyze_enrichment import rank_by_t_test_keyed
 from analyze_enrichment import evaluate_rankings_keyed
@@ -36,13 +37,15 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     master_genes = load_gene_popularity(data_set).keys()
     enrichment_scores = load_ssGSEA_scores(data_set)
     gene_sets = load_filtered_gene_sets(data_set)
+    best_models = load_best_models("BC", 10, 10) 
 
     gene_evaluation_median = {}
     gene_evaluation_full = {}
 
     good_genes = []
     for master_gene in master_genes:
-        if gene_options == 'all' or master_gene in gene_options:
+        #if gene_options == 'all' or master_gene in gene_options:
+        if master_gene in best_models.keys()
             good_genes.append(master_gene)
     print("Loaded data!")
 
