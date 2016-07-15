@@ -66,6 +66,7 @@ def rank_by_t_test(enrichment_scores, phenotypes):
             class0, class1 = analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set)
             tstat, pvalue = stats.ttest_ind(class0, class1, nan_policy='raise')
             scores[gene_set] = (abs(tstat), pvalue)
+            print("\t\t\tSet " + gene_set + " done")
         rankings.append(scores)
         print("\t\tFinished t test for trial " + count.count() + " out of " + str(len(phenotypes)))
 
