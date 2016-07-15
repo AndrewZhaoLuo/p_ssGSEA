@@ -32,6 +32,7 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     ToDo: finish doc
     '''
 
+    print("Starting analysis...")
     master_genes = load_gene_popularity(data_set).keys()
     enrichment_scores = load_ssGSEA_scores(data_set)
     gene_sets = load_filtered_gene_sets(data_set)
@@ -43,6 +44,7 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     for master_gene in master_genes:
         if gene_options == 'all' or master_gene in gene_options:
             good_genes.append(master_gene)
+    print("Loaded data!")
 
     #ToDo: find way to do this without spawning proccesses
     pool = Pool(processes=NUM_PROCESSES)
@@ -62,13 +64,15 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
                 sampled_pheno_map.append(sampled_map)
 
             pheno_map[key] = sampled_pheno_map
-            
+    print("Calculated phenotypes")
+
     #work out the enrichment_score ranks
     enrichment_list = pool.starmap(rank_by_t_test_keyed, [(enrichment_scores, pheno_map[gene], gene) for gene in good_genes])
     enrichment_map = {}
     for enrichment in enrichment_list:
         for key in enrichment.keys():
             enrichment_map[key] = enrichment[key]
+    print("Calculated enrichment")
 
     #finally translate that to gene rankings
     results_map = pool.starmap(evaluate_rankings_keyed, [(enrichment_map[gene], gene_sets, gene) for gene in good_genes])
@@ -79,6 +83,7 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
                 print(master_gene + "\t" + str(evaluation))
                 gene_evaluation_median[master_gene] = numpy.median(evaluation)
                 gene_evaluation_full[master_gene] = evaluation
+    print("Calculated ranking")
 
     pool.close()
     pool.join()

@@ -72,6 +72,7 @@ def rank_by_t_test_keyed(enrichment_scores, phenotypes, master_gene):
     '''
     As above, but returns a map mapping master_gene to the results
     '''
+    print("\t\tExamining gene " + master_gene)
     return {master_gene: rank_by_t_test(enrichment_scores, phenotypes)}
 
 def evaluate_rankings(rankings, gene_sets, master_gene):
@@ -137,7 +138,7 @@ def evaluate_rankings_keyed(rankings, gene_sets, master_gene):
     '''
     As above, but returns the value keyed to the master_gene
     '''
-
+    print("\t\tRanking gene " + master_gene)
     return {master_gene: evaluate_rankings(rankings, gene_sets, master_gene)}
 
 
