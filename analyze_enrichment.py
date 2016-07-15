@@ -6,10 +6,10 @@ import scipy.stats as stats
 
 def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
     '''
-    This script given a series of enrichment scores and phenotypes, returns a tuple of lists representing the
+    Given a series of enrichment scores and phenotypes, returns a tuple of lists representing the
     enrichment for class 0/1 phenotypes
 
-    :param enrichment_scores: a mapping of gene_set names to a dictionary mapping id's to their enrichment scores for \
+    :param enrichment_scores: a mapping of gene_set names to a dict mapping id's to the corresponding enrichment score for \
     the gene_set
     :type enrichment_scores: dict
 
@@ -38,7 +38,7 @@ def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
 
 def rank_by_t_test(enrichment_scores, phenotypes):
     '''
-    Given a map of gene_sets to a dictionary of id's to enrichment scores for a gene set, and a list of dictionaries
+    Given a map of gene_sets to a dictionary mapping id's to enrichment scores for a gene set, and a list of dictionaries
     mapping id's to phenotype class 0 or 1, each element of the list representing a trial of simulated phenotype,
     returns a list, one element for every trial of simulated phenotype, where each element is a map of gene_set names
     to a tuple in the form (a, b) where a is the t-score found by comparing the distributions of enrichment scores
@@ -54,7 +54,6 @@ def rank_by_t_test(enrichment_scores, phenotypes):
 
     :returns: a list of maps, mapping gene_sets to a tuple of representing t-score and p-value
     '''
-    print("tic")
     gene_sets = enrichment_scores.keys()
 
     rankings = []
@@ -70,6 +69,9 @@ def rank_by_t_test(enrichment_scores, phenotypes):
     return rankings
 
 def rank_by_t_test_keyed(enrichment_scores, phenotypes, master_gene):
+    '''
+    As above, but returns a map mapping master_gene to the results
+    '''
     return {master_gene: rank_by_t_test(enrichment_scores, phenotypes)}
 
 def evaluate_rankings(rankings, gene_sets, master_gene):

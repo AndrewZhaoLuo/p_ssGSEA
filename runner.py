@@ -29,7 +29,7 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     by a t-test of the class sepearated enrichment data. Gene ranking is done by looking at the sets in which the
     master gene belongs. The master gene should show up at the very top of the sets.
 
-    ToDo: finish
+    ToDo: finish doc
     '''
 
     master_genes = load_gene_popularity(data_set).keys()
@@ -44,7 +44,7 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
         if gene_options == 'all' or master_gene in gene_options:
             good_genes.append(master_gene)
 
-    #fast and threaded!!!
+    #ToDo: find way to do this without spawning proccesses
     pool = Pool(processes=NUM_PROCESSES)
 
     #load phenotypes, maps master gene to phenotype

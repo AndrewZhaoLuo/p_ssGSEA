@@ -8,22 +8,7 @@ import os
 import pickle
 import sqlite3
 from data_models import *
-
-'''
-memoization decorator
-
-Credit to Huang Tao
-'''
-class memorize(dict):
-    def __init__(self, func):
-        self.func = func
-
-    def __call__(self, *args):
-        return self[args]
-
-    def __missing__(self, key):
-        result = self[key] = self.func(*key)
-        return result
+from functools import lru_cache
 
 class counter():
     def __init__(self):
@@ -36,7 +21,6 @@ class counter():
     def __str__(self):
         return str(self.i)
 
-
 #to do: pick better policy/write own
 #from functools import lru_cache
 
@@ -44,6 +28,7 @@ DATASETS = {"BC"}
 DATA_DIR = os.getcwd() + "/Data/AppCache"
 
 EXPRESSION_PROFILES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+'''Returns the path of the directory where the Expression profile lives'''
 
 EXPRESSION_PROFILES_FILE = lambda dataset: EXPRESSION_PROFILES_DIR(dataset) +  dataset + "_SampleProfiles.pkl"
 '''Returns the path used to cache/uncache expression profiles for the given dataset'''
@@ -77,7 +62,6 @@ def dump_sample_profiles(dataset):
 
     samples = {}
     for num in sample_nums:
-        print("\t\t" + str(count.count()))
         #get all gene profiles from each profile
         cursor.execute("Select Sample, Gene, Intensity From " + table + " WHERE Sample='%s' AND Gene != ''" % num)
         sample_profiles = cursor.fetchall()
@@ -90,10 +74,11 @@ def dump_sample_profiles(dataset):
             profiles[gene] = (expression_profile(id, gene, intensity, other_fields))
 
         samples[num] = sample(profiles, num)
+        print("\t\tCompleted profile: " + str(count.count()) + " out of " + str(len(sample_nums)))
 
     pickle.dump(samples, open(EXPRESSION_PROFILES_FILE(dataset), 'wb'), protocol=-1)
 
-@memorize
+@lru_cache(max_size=16)
 def load_sample_profiles(dataset):
     '''
     Returns expression data for the dataset, caching information along the way.
@@ -107,8 +92,9 @@ def load_sample_profiles(dataset):
         print("\tOpenning cached expression data!")
         return pickle.load(open(EXPRESSION_PROFILES_FILE(dataset), 'rb'))
 
-    print("\tCalculating and saving expression data!")
+    print("\tCalculating expression data!")
     dump_sample_profiles(dataset)
+    print("\tSaved expression data!")
     return load_sample_profiles(dataset)
 
 '''
@@ -149,7 +135,7 @@ def dump_gene_models(dataset):
 
     pickle.dump(models, open(GENE_MODELS_FILE(dataset), 'wb'), protocol=-1)
 
-@memorize
+@lru_cache
 def load_gene_models(dataset):
     '''
     Returns gene models of the dataset, caching information along the way.
@@ -163,8 +149,9 @@ def load_gene_models(dataset):
         print("\tOpenning models!")
         return pickle.load(open(GENE_MODELS_FILE(dataset), 'rb'))
 
-    print("\tCalculating and saving model data!")
+    print("\tCalculating GMM data!")
     dump_gene_models(dataset)
+    print("\tSaving GMM data")
     return load_gene_models(dataset)
 
 '''
@@ -175,6 +162,7 @@ GENE_SET_GENE_TABLE = "GeneSet_Genes"
 GENE_SET_URL_TABLE = "GeneSet_URL"
 
 GENE_POPULARITY_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+'''The directory where gene populairty file lives'''
 GENE_POPULARITY_FILE = lambda dataset: GENE_POPULARITY_DIR(dataset) + dataset + "_GenePopularity.pkl"
 '''Returns the path used to cache/uncache gene popularity for the given dataset'''
 
@@ -204,14 +192,14 @@ def dump_gene_popularity(dataset):
     cursor = sqlite3.connect(GENE_SET_DB).cursor()
     gene_pop = {}
     for names in gene_names:
-        print("\t\t" + str(count.count()))
         cursor.execute("Select GeneSet From " + GENE_SET_GENE_TABLE + " WHERE Gene='%s'" % names)
         gene_pop[names] = len(cursor.fetchall())
+        print("\t\tCalcuated populairty for gene " + str(count.count()) + " out of " + str(len(gene_names)))
 
     cursor.close()
     pickle.dump(gene_pop, open(GENE_POPULARITY_FILE(dataset), 'wb'), protocol=-1)
 
-@memorize
+@lru_cache
 def load_gene_popularity(dataset):
     '''
     Returns gene popularity data for the dataset, caching information along the way.
@@ -225,8 +213,9 @@ def load_gene_popularity(dataset):
         print("\tOpenning cached gene popularities!")
         return pickle.load(open(GENE_POPULARITY_FILE(dataset), 'rb'))
 
-    print("\tCalculating and saving gene popularities")
+    print("\tCalculating gene popularities")
     dump_gene_popularity(dataset)
+    print("\tSaving gene popularities")
     return load_gene_popularity(dataset)
 
 '''
@@ -250,18 +239,17 @@ def dump_all_gene_sets():
     gene_sets = {}
     count = counter()
     for set in sets:
-        print("\t\t" + str(count.count()))
         cursor.execute("Select Distinct Gene From " + GENE_SET_GENE_TABLE + " WHERE GeneSet='%s'" % set)
         genes = {x[0] for x in cursor.fetchall()}
         cursor.execute("Select Distinct URL From " + GENE_SET_URL_TABLE + " WHERE GeneSet='%s'" % set)
         url = cursor.fetchall()[0][0]
-
         gene_sets[set] = gene_set(set, url, genes)
+        print("\t\tProcessed set " + str(count.count()) + " out of " + str(len(sets)))
 
     cursor.close()
     pickle.dump(gene_sets, open(GENE_SET_FILE, 'wb'), protocol=-1)
 
-@memorize
+@lru_cache
 def load_all_gene_sets():
     '''
     Returns all stored gene sets, caching information along the way.
@@ -273,8 +261,9 @@ def load_all_gene_sets():
         print("\tOpenning cached gene sets!")
         return pickle.load(open(GENE_SET_FILE, 'rb'))
 
-    print("\tSaving gene sets!")
+    print("\tCalculating gene sets!")
     dump_all_gene_sets()
+    print("\tSaving gene sets!")
     return load_all_gene_sets()
 
 FILTERED_GENE_SET_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
@@ -301,16 +290,15 @@ def dump_filtered_gene_sets(dataset):
     filtered_sets = {}
     count = counter()
     for set_name in gene_sets:
-        print("\t\t" + str(count.count()))
-        print("Examining set: " + set_name)
         cur_set = gene_sets[set_name]
         new_genes = {gene for gene in cur_set.genes if gene in valid_genes}
         if len(new_genes) > 0:
             filtered_sets[set_name] = gene_set(set_name, cur_set.url, new_genes)
+        print("\t\tProcessed set " + str(count.count()) + " out of " + str(len(gene_sets)))
 
     pickle.dump(filtered_sets, open(FILTERED_GENE_SET_FILE(dataset), 'wb'), protocol=-1)
 
-@memorize
+@lru_cache
 def load_filtered_gene_sets(dataset):
     '''
     Returns gene sets valid for the given dataset, caching information along the way.
@@ -322,8 +310,9 @@ def load_filtered_gene_sets(dataset):
         print("\tOpenning cached gene sets!")
         return pickle.load(open(FILTERED_GENE_SET_FILE(dataset), 'rb'))
 
-    print("\tSaving gene sets!")
+    print("\tCalculating filtered gene sets!")
     dump_filtered_gene_sets(dataset)
+    print("\tSaving filtered gene sets!")
     return load_filtered_gene_sets(dataset)
 
 '''
@@ -343,6 +332,7 @@ def dump_BC_clinical_profiles():
     cursor.execute("Select * From BC_ClinicalData")
     rows = cursor.fetchall()
 
+    count = counter()
     profiles = {}
     for row in rows:
         sample_num, first_series, posnodes, event_meta, \
@@ -366,10 +356,11 @@ def dump_BC_clinical_profiles():
         other_fields["c1_used"] = c1_used
 
         profiles[sample_num] = (clinical_data(sample_num, other_fields))
+        print("\t\tProcessed patient " + count.count() + " out of " + str(len(rows)))
 
     pickle.dump(profiles, open(BC_CLINICAL_PROFILES_FILE, 'wb'), protocol=-1)
 
-@memorize
+@lru_cache
 def load_BC_clinical_profiles():
     '''
     Returns clinical profiles for the BC set, caching information along the way.
@@ -380,8 +371,9 @@ def load_BC_clinical_profiles():
         print("\tOpenning cached clinical profiles for BC set!")
         return pickle.load(open(BC_CLINICAL_PROFILES_FILE, 'rb'))
 
-    print("\tCalculating and saving BC clinical profiles!")
+    print("\tCalculating BC clinical profiles!")
     dump_BC_clinical_profiles()
+    print("\tSaving BC clinical profiles!")
     return load_BC_clinical_profiles()
 
 '''
@@ -415,6 +407,7 @@ def dump_best_models(dataset, num_bins, genes_per_bin):
 
     #Here we check every gene fits the criteria and then add it to appropriate bin
     #bins are maps k : v where k = gene name v = bayes error
+    count = counter()
     gene_names = gene_models.keys()
     for gene in gene_names:
         model = gene_models[gene]
@@ -427,6 +420,7 @@ def dump_best_models(dataset, num_bins, genes_per_bin):
             bin = find_bin(prior)
             bins[bin][gene] = error
 
+        print("Examined gene " + str(count.count()) + " out of " + str(len(gene_names)))
 
     #then we go through each bin and take the 10 smallest bayes error
     #bestmodels is k: v where k = gene name and v = bayes error for that model
@@ -438,7 +432,7 @@ def dump_best_models(dataset, num_bins, genes_per_bin):
 
     pickle.dump(best_models, open(BEST_MODELS_FILE(dataset, num_bins, genes_per_bin), 'wb'), protocol=-1)
 
-@memorize
+@lru_cache
 def load_best_models(dataset, num_bins, genes_per_bin):
     '''
     Returns the best genes for the given dataset, caching information along the way.
@@ -459,8 +453,9 @@ def load_best_models(dataset, num_bins, genes_per_bin):
         print("\tOpenning cached best models!")
         return pickle.load(open(BEST_MODELS_FILE(dataset, num_bins, genes_per_bin), 'rb'))
 
-    print("\tSaving best models!")
+    print("\tCalculating best models!")
     dump_best_models(dataset, num_bins, genes_per_bin)
+    print("\tSaving best models!")
     return load_all_gene_sets()
 
 '''
@@ -500,14 +495,14 @@ def dump_sim_phenotypes(dataset, n, master_gene):
     data_sets = []
     count = counter()
     for i in range(0, n):
-        print("\t\t" + str(count.count()))
         labels = simulate_data(models, master_gene, [samples[key] for key in samples.keys()], len(samples))
         data_sets.append(labels)
+        print("\t\tSimulation " + str(count.count()) + " complete out of " + str(n))
 
     pickle.dump(data_sets, open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'wb'))
 
 #breaks multithreading -> messes up their pickling
-#@memorize
+#@lru_cache
 def load_sim_phenotypes(dataset, n, master_gene):
     '''
     Returns the a set of n simulated phenotypes using the given mastergene, caching data along the way
@@ -525,8 +520,9 @@ def load_sim_phenotypes(dataset, n, master_gene):
         print("\tOpenning cached simulated phenotype data!")
         return pickle.load(open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'rb'))
 
-    print("\tCalculating and saving simulated phenotype data!")
+    print("\tCalculating simulated phenotype data!")
     dump_sim_phenotypes(dataset, n, master_gene)
+    print("\tSaving simulated phenotype data!")
     return load_sim_phenotypes(dataset, n, master_gene)
 
 def load_sim_phenotype_keyed(dataset, n, master_gene):
@@ -560,7 +556,6 @@ def dump_ssGSEA_scores(dataset):
     #for each gene set
     count = counter()
     for set in gene_sets.keys():
-        print("\t\t" + str(count.count()))
         gene_set = gene_sets[set].genes
 
         #go through all the samples and calculate the ES
@@ -579,11 +574,12 @@ def dump_ssGSEA_scores(dataset):
             scores[id] = sum(score)
 
         paths[set] = scores
-        print("1 set done enriched scores our of " + str(len(gene_sets.keys())))
+
+        print("\t\tScores for set " + str(count.count()) + " done out of " + str(len(gene_sets.keys())))
 
     pickle.dump(paths, open(ssGSEA_SCORES_FILES(dataset), 'wb'))
 
-@memorize
+@lru_cache
 def load_ssGSEA_scores(dataset):
     '''
     Returns a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set
@@ -595,11 +591,12 @@ def load_ssGSEA_scores(dataset):
     '''
 
     if os.path.exists(ssGSEA_SCORES_FILES(dataset)):
-        print("\tOpenning cached gene sets!")
+        print("\tOpenning cached enrichment sets!")
         return pickle.load(open(ssGSEA_SCORES_FILES(dataset), 'rb'))
 
-    print("\tSaving gene sets!")
+    print("\tCalculating enrichment data!")
     dump_ssGSEA_scores(dataset)
+    print("\tSaving enrichment data!")
     return load_ssGSEA_scores(dataset)
 
 if __name__ == "__main__":

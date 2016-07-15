@@ -60,7 +60,7 @@ def get_trained_models(gene_profiles):
 
         i += 1
         if i % 100 == 0:
-            print("Trained " + str(i) + " out of " + str(len(gene_profiles.keys())))
+            print("\t\tTrained " + str(i) + " out of " + str(len(gene_profiles.keys())))
 
     genes = []
     for gene_sample in gene_profiles:
