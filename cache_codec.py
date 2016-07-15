@@ -427,8 +427,8 @@ def dump_best_models(dataset, num_bins, genes_per_bin):
     best_models = {}
     for bin in bins:
         best_genes = heapq.nsmallest(genes_per_bin, bin, key=bin.get)
-        for gene in best_genes:
-            best_models[gene] = bin[gene]
+        for i in range(0, 10):
+            best_models[best_genes[i]] = bin[best_genes[i]]
 
     pickle.dump(best_models, open(BEST_MODELS_FILE(dataset, num_bins, genes_per_bin), 'wb'), protocol=-1)
 
