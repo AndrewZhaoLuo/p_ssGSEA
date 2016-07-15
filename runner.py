@@ -92,23 +92,34 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
 
     f.close()
 
-if __name__ == "__main__":
-    import os
-    import sys
+import os
+import sys
+
+def main(argv):
+    if len(argv) < 3:
+        print("Usage: python runner.py [NUM_PROCESSES] [REPLICATES] [SAMPLES_PER_REPLICATE] <...GENES>")
+        return
+
+    NUM_PROCESSES = int(argv[0])
+    REPLICATES = int(argv[1])
+    SAMPLES_PER_REPLICATE = int(argv[2])
+
+    genes = []
+    if len(argv) < 4:
+        genes = 'all'
+    else:
+        genes = [gene for gene in argv[3:]]
 
     print("Starting analysis...")
-
-    #redirect stdout to nothing in order to speed up program
-    old = sys.stdout
-    null = open(os.devnull, 'w')
-    #sys.stdout = null
 
     #run algo
     import timeit
     start = timeit.default_timer()
-    run_analysis_on_dataset("BC", 100, 100, gene_options=["ERBB2"])
+    run_analysis_on_dataset("BC", REPLICATES, SAMPLES_PER_REPLICATE, gene_options=genes)
     end = timeit.default_timer()
 
     #reset output to terminal and print results!
-    sys.stdout = old
     print("Took " + str(end - start) + "s")
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
