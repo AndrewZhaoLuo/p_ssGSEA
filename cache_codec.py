@@ -21,9 +21,6 @@ class counter():
     def __str__(self):
         return str(self.i)
 
-#to do: pick better policy/write own
-#from functools import lru_cache
-
 DATASETS = {"BC"}
 DATA_DIR = os.getcwd() + "/Data/AppCache"
 

@@ -91,15 +91,15 @@ if __name__ == "__main__":
     import cache_codec
     #code given master gene, prints out graph of
     #generated class0/1 phenotype profiles
-    MASTER_GENE = "CLIC3"
+    MASTER_GENE = "ERBB2"
 
     gene_sets = cache_codec.load_filtered_gene_sets("BC")
     enrichment_scores = cache_codec.load_ssGSEA_scores("BC")
-
     phenotypes = cache_codec.load_sim_phenotypes("BC", 10, MASTER_GENE)
 
     model = cache_codec.load_gene_models("BC")[MASTER_GENE]
     good_sets = [sets for sets in enrichment_scores.keys() if MASTER_GENE in gene_sets[sets].genes]
+    print(good_sets)
 
     import Extra_Modules.gaussian_sampling
     import analyze_enrichment

@@ -3,7 +3,6 @@ This file contains scripts for running stuff man
 '''
 
 from multiprocessing import Pool
-
 import numpy
 
 #import cache_codec
@@ -16,7 +15,7 @@ from cache_codec import load_best_models
 from analyze_enrichment import rank_by_t_test_keyed
 from analyze_enrichment import evaluate_rankings_keyed
 
-import numpy.random as nrandom
+import pickle
 import random
 
 NUM_PROCESSES = 4
@@ -31,20 +30,18 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     master gene belongs. The master gene should show up at the very top of the sets.
 
     ToDo: finish doc
+
+    ToDo: get rid of hackey things done in this evil abomination of code. My mentors are crying in their sleep
     '''
 
     print("Starting analysis...")
     master_genes = load_gene_popularity(data_set).keys()
     enrichment_scores = load_ssGSEA_scores(data_set)
     gene_sets = load_filtered_gene_sets(data_set)
-    best_models = load_best_models("BC", 10, 10) 
-
-    gene_evaluation_median = {}
-    gene_evaluation_full = {}
+    best_models = load_best_models("BC", 10, 10)
 
     good_genes = []
     for master_gene in master_genes:
-        #if gene_options == 'all' or master_gene in gene_options:
         if (master_gene in best_models.keys() and gene_options == 'all') or master_gene in gene_options:
             good_genes.append(master_gene)
     print("Loaded data!")
@@ -77,6 +74,12 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
             enrichment_map[key] = enrichment[key]
     print("Calculated enrichment")
 
+    from cache_codec import DATA_DIR
+    pickle.dump(enrichment_map, open(DATA_DIR + "/BC/CachedEnrichmentPValueSplit.pkl", 'wb'))
+
+    gene_evaluation_median = {}
+    gene_evaluation_full = {}
+
     #finally translate that to gene rankings
     results_map = pool.starmap(evaluate_rankings_keyed, [(enrichment_map[gene], gene_sets, gene) for gene in good_genes])
     for result in results_map:
@@ -93,17 +96,14 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
 
     #print out final rankings
     sorted_genes = sorted(gene_evaluation_median, key=gene_evaluation_median.get)
-    f = open('results.txt','w')
+    f = open('results_rankings.txt','w')
     f.write("Gene\tMedian Rank\tFull Ranks\n")
     for gene in sorted_genes:
         f.write(str(gene) + "\t" + str(gene_evaluation_median[gene]) + "\t" + str(gene_evaluation_full[gene]) + "\n")
-
     f.close()
 
-import os
-import sys
-
 def main(argv):
+
     if len(argv) < 3:
         print("Usage: python runner.py [NUM_PROCESSES] [REPLICATES] [SAMPLES_PER_REPLICATE] <...GENES>")
         return
@@ -130,4 +130,5 @@ def main(argv):
     print("Took " + str(end - start) + "s")
 
 if __name__ == "__main__":
+    import sys
     main(sys.argv[1:])

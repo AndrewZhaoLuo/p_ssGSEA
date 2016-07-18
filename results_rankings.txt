@@ -1,0 +1,2 @@
+Gene	Median Rank	Full Ranks
+ERBB2	56.0	[226, 18, 3, 3, 62, 50, 721, 955, 42, 219]
