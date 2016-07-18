@@ -19,7 +19,7 @@ from analyze_enrichment import evaluate_rankings_keyed
 import numpy.random as nrandom
 import random
 
-NUM_PROCESSES = 8
+NUM_PROCESSES = 4
 
 def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     '''
@@ -45,7 +45,7 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
     good_genes = []
     for master_gene in master_genes:
         #if gene_options == 'all' or master_gene in gene_options:
-        if master_gene in best_models.keys():
+        if (master_gene in best_models.keys() and gene_options == 'all') or master_gene in gene_options:
             good_genes.append(master_gene)
     print("Loaded data!")
 
