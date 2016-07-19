@@ -14,9 +14,10 @@ enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/CachedEnric
 def get_ranking_data(enrichment_ranks):
     gene_sets = cache_codec.load_all_gene_sets()
 
-    ranks = []
+    ranks = {}
 
     for gene in enrichment_ranks:
+        ranks[gene] = []
         p_values_gene = enrichment_ranks[gene]
         for trial in p_values_gene:
             trial_rank = []
@@ -29,24 +30,24 @@ def get_ranking_data(enrichment_ranks):
                 else:
                     trial_rank.append(0)
 
-            ranks.append(trial_rank)
+            ranks[gene].append(trial_rank)
 
     return ranks
 
-def make_graph_against_sets_picked(gene, ranks, x_range):
+def make_graph_against_sets_picked(gene, rankings, x_range):
     '''
-    currently averages all sets
+    currently averages all sets for a single gene
     '''
 
-    pop = 0
+    gene_rank = rankings[gene]
+    pop = sum(gene_rank[0])
     y_best = []
     y_worst = []
     y_median = []
     y_mean = []
     for x in x_range:
         y_local = []
-        for trial in ranks:
-            pop = sum(trial)
+        for trial in gene_rank:
             tot_sets = sum(trial)
             picked_sets = sum(trial[:(x + 1)])
             percent_picked = picked_sets / tot_sets
@@ -58,17 +59,56 @@ def make_graph_against_sets_picked(gene, ranks, x_range):
         y_worst.append(min(y_local))
 
     x_axis = [x for x in x_range]
+    plotter.xlabel("Top # of sets picked")
+    plotter.ylabel("Proportion of True Gene Sets")
+    plotter.title(gene)
     plotter.plot(x_axis, y_mean, label='mean')
     plotter.plot(x_axis, y_median, label='median')
     plotter.plot(x_axis, y_best, label='best')
     plotter.plot(x_axis, y_worst, label='worse')
-    plotter.legend(loc='upper right')
+    plotter.legend(loc='upper left')
 
     plotter.savefig("./Pictures/Analysis_" + gene + " popularity: " + str(pop))
     plotter.close()
 
-def make_graph_against_sets_all(ranks, x_range):
-    print()
+def make_graph_against_sets_all(rankings, x_range):
+    '''
+    currently averages all sets across all genes
+    '''
+    pop = 0
+
+    y_tot_sets = []
+    y_tot_hit = []
+    for x in x_range:
+        y_tot_sets_local = []
+        y_tot_hit_local = []
+
+        for gene in rankings:
+            gene_rank = rankings[gene]
+            for trial in gene_rank:
+                tot_sets = sum(trial)
+                picked_sets = sum(trial[:(x + 1)])
+
+                y_tot_sets_local.append(tot_sets)
+                y_tot_hit_local.append(picked_sets)
+
+        y_tot_sets.append(y_tot_sets_local)
+        y_tot_hit.append(y_tot_hit_local)
+
+    y_mean = []
+    for i in range(0, len(y_tot_hit)):
+        y_mean.append(sum(y_tot_hit[i]) / sum(y_tot_sets[i]))
+
+    x_axis = [x for x in x_range]
+    plotter.plot(x_axis, y_mean, label='mean')
+
+    plotter.xlabel("Top # of sets picked")
+    plotter.ylabel("Proportion of True Gene Sets")
+    plotter.savefig("./Pictures/TotalAnalysis")
+    plotter.close()
+
 
 ranking = get_ranking_data(enrichment_ranks)
-make_graph_against_sets_picked("ERBB2", ranking, range(0, len(ranking[0])))
+make_graph_against_sets_picked("ERBB2", ranking, range(0, len(ranking["ERBB2"][0])))
+make_graph_against_sets_picked("SOX10", ranking, range(0, len(ranking["SOX10"][0])))
+make_graph_against_sets_all(ranking, range(0, len(ranking["SOX10"][0])))
