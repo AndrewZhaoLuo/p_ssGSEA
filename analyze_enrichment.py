@@ -101,6 +101,9 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
     def linear_method(ranking):
         # parse gene_sets in order from high tstat to low
         sorted_sets = sorted(ranking, key=ranking.get, reverse=True)
+        #for set in sorted_sets:
+        #    print(ranking[set])
+
         # for scores for every gene ranking
         running_scores = {}
         # number of times gene appears in list of sets

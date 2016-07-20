@@ -598,6 +598,85 @@ def load_ssGSEA_scores(dataset):
     print("\tSaving enrichment data!")
     return load_ssGSEA_scores(dataset)
 
+'''
+****************************Bayes Phenotypes****************************
+'''
+BAYES_SCORES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+BAYES_SCORES_FILE = lambda dataset, mode: BAYES_SCORES_DIR(dataset) + dataset + "_" + str(mode) + "_BayesHighScores.pkl"
+'''Returns the path used to cache/uncache gene enrichment scores per id'''
+from p_model import pmodel
+def dump_bayes_scores(dataset, mode):
+    """
+    For every id and good gene set of the given dataset, dumps enrichment score information. Specifically dumps
+    a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set.
+
+    :param dataset: the dataset from which to reference data from
+    :type dataset: str
+    """
+    if not os.path.exists(BAYES_SCORES_DIR(dataset)):
+        os.makedirs(BAYES_SCORES_DIR(dataset))
+
+    gene_sets = load_filtered_gene_sets(dataset)
+    samples = load_sample_profiles(dataset)
+
+    max_expression = {}
+    #first normalize gene expression values
+    for id in samples:
+        sample = samples[id]
+        for gene in sample.profiles.keys():
+            exp = abs(sample.profiles[gene].intensity)
+
+            if gene not in max_expression.keys():
+                max_expression[gene] = exp
+            elif exp > max_expression[gene]:
+                max_expression[gene] = exp
+
+    paths = {}
+    #for each gene set
+    count = counter()
+    for set in gene_sets.keys():
+        gene_set = gene_sets[set].genes
+
+        #go through all the samples and calculate the ES
+        scores = {}
+        for id in samples.keys():
+            profile = samples[id].profiles
+            expressions = []
+
+            for gene in profile.keys():
+                if gene in gene_set:
+                    #-.0001 because rounding to 1 = nan values
+                    expressions.append(profile[gene].intensity / max_expression[gene] - 0.0001)
+
+            score = pmodel(expressions, [0.33 , 0.33, 0.33], mode)
+            scores[id] = score
+
+        paths[set] = scores
+
+        print("\t\tScores for set " + str(count.count()) + " done out of " + str(len(gene_sets.keys())))
+
+    pickle.dump(paths, open(BAYES_SCORES_FILE(dataset, mode), 'wb'))
+
+@lru_cache(maxsize=16)
+def load_bayes_scores(dataset, mode):
+    '''
+    Returns a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set
+
+    :param dataset: the dataset from which to reference data from
+    :type dataset: str
+
+    :returns: a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores
+    '''
+
+    if os.path.exists(BAYES_SCORES_FILE(dataset, mode)):
+        print("\tOpenning cached enrichment sets!")
+        return pickle.load(open(BAYES_SCORES_FILE(dataset, mode), 'rb'))
+
+    print("\tCalculating enrichment data!")
+    dump_bayes_scores(dataset, mode)
+    print("\tSaving enrichment data!")
+    return load_ssGSEA_scores(dataset)
+
 if __name__ == "__main__":
     g = load_sample_profiles("BC")
     print(g[4].profiles.keys())

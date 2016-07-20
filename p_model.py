@@ -47,7 +47,6 @@ hHigh = beta(2,0.5)
 # 1 - hMid.cdf(0.4) - hMid.sf(0.6)
 # hHigh.cdf(0.4)
 
-
 ########################################
 
 def pmodel(dat1, priors, mode):
@@ -68,25 +67,27 @@ def pmodel(dat1, priors, mode):
         p2 = p2 * min(hMid.sf(di), hMid.cdf(di)) * 2.0
         p3 = p3 * hHigh.cdf(di)
 
-        ptot = p1+p2+p3
-        p1 /= ptot
-        p2 /= ptot
-        p3 /= ptot
-        print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
+    ptot = p1+p2+p3
+    p1 /= ptot
+    p2 /= ptot
+    p3 /= ptot
+    #print(dat1)
+    print("low  " + str(p1) + "mid  " + str(p2) + "high " + str(p3))
 
     if mode == 'high':
         return(p3)
     elif mode == 'low':
         return(p1)
     else:
-        return(max(p1,p3))
-
+        return(p2)
 
 ########################################
-dat2 = [0.3, 0.4, 0.44, 0.33]
+dat2 = [-0.3, 0.4, 0.44, 0.33]
 p1 = 0.333 # h1
 p2 = 0.333 # h2
 p3 = 0.333 # h3
+
+print(pmodel(dat2, [p1, p2, p3], 'mid'))
 
 for di in dat2:
     p1 = p1 * hLow.sf(di)
@@ -98,7 +99,7 @@ p1 /= ptot
 p2 /= ptot
 p3 /= ptot
 print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
-
+print()
 
 ########################################
 dat3 = [0.88, 0.89, 0.9]
@@ -117,7 +118,7 @@ p1 /= ptot
 p2 /= ptot
 p3 /= ptot
 print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
-
+print()
 
 ########################################
 dat4 = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
@@ -136,6 +137,7 @@ p1 /= ptot
 p2 /= ptot
 p3 /= ptot
 print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
+print()
 
 ########################################
 
@@ -155,7 +157,7 @@ p1 /= ptot
 p2 /= ptot
 p3 /= ptot
 print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
-
+print()
 
 ########################################
 # even a strong prior, in the face of convincing data,
@@ -177,5 +179,5 @@ p1 /= ptot
 p2 /= ptot
 p3 /= ptot
 print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
-
+print()
 #############

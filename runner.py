@@ -11,6 +11,7 @@ from cache_codec import load_gene_popularity
 from cache_codec import load_ssGSEA_scores
 from cache_codec import load_filtered_gene_sets
 from cache_codec import load_best_models
+from cache_codec import load_bayes_scores
 
 from analyze_enrichment import rank_by_t_test_keyed
 from analyze_enrichment import evaluate_rankings_keyed
@@ -20,7 +21,7 @@ import random
 
 NUM_PROCESSES = 7
 
-def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
+def run_analysis_on_dataset(NUM_PROCCESSES, data_set, n, pheno_sample, gene_options='all', test='ssGSEA'):
     '''
     Given data_set, and n which is the number of replicates for the experiment:
     for every gene in the data_set for which there exists a filtered gene set, creates imaginary phenotypes for every
@@ -36,7 +37,20 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
 
     print("Starting analysis...")
     master_genes = load_gene_popularity(data_set).keys()
-    enrichment_scores = load_ssGSEA_scores(data_set)
+
+    enrichment_scores = None
+    if test == 'ssGSEA':
+        enrichment_scores = load_ssGSEA_scores(data_set)
+    elif test == 'bayes_low':
+        enrichment_scores = load_bayes_scores(data_set, 'low')
+    elif test == 'bayes_mid':
+        enrichment_scores = load_bayes_scores(data_set, 'mid')
+    elif test == 'bayes_high':
+        enrichment_scores = load_bayes_scores(data_set, 'high')
+    else:
+        print("ERROR, invalid enrichment test!")
+        return
+
     gene_sets = load_filtered_gene_sets(data_set)
     best_models = load_best_models("BC", 10, 10)
 
@@ -74,8 +88,9 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
             enrichment_map[key] = enrichment[key]
     print("Calculated enrichment")
 
+    #dataman!!
     from cache_codec import DATA_DIR
-    pickle.dump(enrichment_map, open(DATA_DIR + "/BC/CachedEnrichmentPValueSplit.pkl", 'wb'))
+    pickle.dump(enrichment_map, open(DATA_DIR + "/BC/" + str(test) + "CachedEnrichmentPValueSplit.pkl", 'wb'))
 
     gene_evaluation_median = {}
     gene_evaluation_full = {}
@@ -104,26 +119,27 @@ def run_analysis_on_dataset(data_set, n, pheno_sample, gene_options='all'):
 
 def main(argv):
 
-    if len(argv) < 3:
-        print("Usage: python runner.py [NUM_PROCESSES] [REPLICATES] [SAMPLES_PER_REPLICATE] <...GENES>")
+    if len(argv) < 4:
+        print("Usage: python runner.py [NUM_PROCESSES] [REPLICATES] [SAMPLES_PER_REPLICATE] [TEST: ssGSEA | bayes_high | bayes_low | bayes_mid] <...GENES, empty for all>")
         return
 
     NUM_PROCESSES = int(argv[0])
     REPLICATES = int(argv[1])
     SAMPLES_PER_REPLICATE = int(argv[2])
+    TEST = str(argv[3])
 
     genes = []
-    if len(argv) < 4:
+    if len(argv) < 5:
         genes = 'all'
     else:
-        genes = [gene for gene in argv[3:]]
+        genes = [gene for gene in argv[4:]]
 
     print("Starting analysis...")
 
     #run algo
     import timeit
     start = timeit.default_timer()
-    run_analysis_on_dataset("BC", REPLICATES, SAMPLES_PER_REPLICATE, gene_options=genes)
+    run_analysis_on_dataset(NUM_PROCESSES, "BC", REPLICATES, SAMPLES_PER_REPLICATE, gene_options=genes, test=TEST)
     end = timeit.default_timer()
 
     #reset output to terminal and print results!
