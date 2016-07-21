@@ -80,7 +80,7 @@ def pmodel(dat1, priors, mode):
         return(p1)
     else:
         return(p2)
-
+'''
 ########################################
 dat2 = [-0.3, 0.4, 0.44, 0.33]
 p1 = 0.333 # h1
@@ -181,3 +181,4 @@ p3 /= ptot
 print("low  " + str(p1) + "\nmid  " + str(p2) + "\nhigh " + str(p3))
 print()
 #############
+'''

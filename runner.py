@@ -118,7 +118,6 @@ def run_analysis_on_dataset(NUM_PROCCESSES, data_set, n, pheno_sample, gene_opti
     f.close()
 
 def main(argv):
-
     if len(argv) < 4:
         print("Usage: python runner.py [NUM_PROCESSES] [REPLICATES] [SAMPLES_PER_REPLICATE] [TEST: ssGSEA | bayes_high | bayes_low | bayes_mid] <...GENES, empty for all>")
         return
