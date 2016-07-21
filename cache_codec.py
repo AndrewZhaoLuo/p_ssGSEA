@@ -620,17 +620,23 @@ def dump_bayes_scores(dataset, mode):
     samples = load_sample_profiles(dataset)
 
     max_expression = {}
+    min_negative_expression = {}
     #first normalize gene expression values
     for id in samples:
         sample = samples[id]
         for gene in sample.profiles.keys():
-            exp = abs(sample.profiles[gene].intensity)
+            exp = sample.profiles[gene].intensity
 
             if gene not in max_expression.keys():
                 max_expression[gene] = exp
-            elif exp > max_expression[gene]:
+            if exp > max_expression[gene]:
                 max_expression[gene] = exp
 
+            if gene not in min_negative_expression.keys():
+                min_negative_expression[gene] = 0
+            if exp < min_negative_expression[gene]:
+                min_negative_expression[gene] = exp
+                
     paths = {}
     #for each gene set
     count = counter()
@@ -645,10 +651,13 @@ def dump_bayes_scores(dataset, mode):
 
             for gene in profile.keys():
                 if gene in gene_set:
+                    #transform expression data into values between 0 and 1
                     #-.0001 because rounding to 1 = nan values
-                    expressions.append(profile[gene].intensity / max_expression[gene] - 0.0001)
+                    expressions.append((profile[gene].intensity - min_negative_expression[gene]) / (max_expression[gene] - min_negative_expression[gene]))
 
             score = pmodel(expressions, [0.33 , 0.33, 0.33], mode)
+            if str(score) == 'nan':
+                print(expressions)
             scores[id] = score
 
         paths[set] = scores

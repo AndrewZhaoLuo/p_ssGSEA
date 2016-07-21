@@ -19,9 +19,9 @@ from analyze_enrichment import evaluate_rankings_keyed
 import pickle
 import random
 
-NUM_PROCESSES = 7
+DEFAULT_NUM_PROCESSES = 7
 
-def run_analysis_on_dataset(NUM_PROCCESSES, data_set, n, pheno_sample, gene_options='all', test='ssGSEA'):
+def run_analysis_on_dataset(NUM_PROCESSES, data_set, n, pheno_sample, gene_options='all', test='ssGSEA'):
     '''
     Given data_set, and n which is the number of replicates for the experiment:
     for every gene in the data_set for which there exists a filtered gene set, creates imaginary phenotypes for every

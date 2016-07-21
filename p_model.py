@@ -63,6 +63,12 @@ def pmodel(dat1, priors, mode):
     p3 = priors[2] # h3
 
     for di in dat1:
+        #Prevent rounding of data points from falling outside of range of algo
+        if di == 1:
+            di = 0.999
+        if di == 0:
+            di = 0.001
+
         p1 = p1 * hLow.sf(di)
         p2 = p2 * min(hMid.sf(di), hMid.cdf(di)) * 2.0
         p3 = p3 * hHigh.cdf(di)
