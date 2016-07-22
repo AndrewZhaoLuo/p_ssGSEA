@@ -7,8 +7,9 @@ import pickle
 import cache_codec
 import numpy as np
 from matplotlib import pyplot as plotter
+matplotlib.use('Agg')
 
-enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/CachedEnrichmentPValueSplit.pkl', 'rb'))
+enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/ssGSEACachedEnrichmentPValueSplit.pkl', 'rb'))
 
 #list of lists. each element is a list of 0's and 1's. 1 means the master gene was in the set at rank indicie + 1
 def get_ranking_data(enrichment_ranks):
