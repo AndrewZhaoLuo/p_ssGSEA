@@ -684,7 +684,44 @@ def load_bayes_scores(dataset, mode):
     print("\tCalculating enrichment data!")
     dump_bayes_scores(dataset, mode)
     print("\tSaving enrichment data!")
-    return load_ssGSEA_scores(dataset)
+    return load_bayes_scores(dataset)
+
+'''
+Null enrichment
+'''
+NULL_SCORES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
+NULL_SCORES_FILE = lambda dataset: NULL_SCORES_DIR(dataset) + dataset + "_"  + "_NullHighScores.pkl"
+def dump_null_scores(dataset):
+    '''
+    Dumps a dictionary mapping gene set to a dicitonary mapping id's to enrichment scores for that set (random scorse)
+    '''
+    if not os.path.exists(NULL_SCORES_DIR(dataset)):
+        os.makedirs(NULL_SCORES_DIR(dataset))
+
+    gene_sets = load_filtered_gene_sets(dataset)
+    samples = load_sample_profiles(dataset)
+
+    random_scores = {}
+    for set in gene_sets.keys():
+        local_scores = {}
+        for id in samples.keys():
+            import random
+            local_scores[id] = random.random() * 5000
+
+        random_scores[set] = local_scores
+
+    pickle.dump(random_scores, open(NULL_SCORES_FILE(dataset), 'wb'))
+
+@lru_cache(maxsize=16)
+def load_null_scores(dataset):
+    if os.path.exists(NULL_SCORES_FILE(dataset)):
+        print("\tOpenning cached enrichment sets!")
+        return pickle.load(open(NULL_SCORES_FILE(dataset), 'rb'))
+
+    print("\tCalculating enrichment data!")
+    dump_null_scores(dataset)
+    print("\tSaving enrichment data!")
+    return load_null_scores(dataset)
 
 if __name__ == "__main__":
     g = load_sample_profiles("BC")

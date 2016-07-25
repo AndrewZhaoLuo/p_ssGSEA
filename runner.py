@@ -12,6 +12,7 @@ from cache_codec import load_ssGSEA_scores
 from cache_codec import load_filtered_gene_sets
 from cache_codec import load_best_models
 from cache_codec import load_bayes_scores
+from cache_codec import load_null_scores
 
 from analyze_enrichment import rank_by_t_test_keyed
 from analyze_enrichment import evaluate_rankings_keyed
@@ -47,6 +48,8 @@ def run_analysis_on_dataset(NUM_PROCESSES, data_set, n, pheno_sample, gene_optio
         enrichment_scores = load_bayes_scores(data_set, 'mid')
     elif test == 'bayes_high':
         enrichment_scores = load_bayes_scores(data_set, 'high')
+    elif test == "null":
+        enrichment_scores = load_null_scores(data_set)
     else:
         print("ERROR, invalid enrichment test!")
         return
@@ -90,7 +93,7 @@ def run_analysis_on_dataset(NUM_PROCESSES, data_set, n, pheno_sample, gene_optio
 
     #dataman!!
     from cache_codec import DATA_DIR
-    pickle.dump(enrichment_map, open(DATA_DIR + "/BC/" + str(test) + "CachedEnrichmentPValueSplit.pkl", 'wb'))
+    pickle.dump(enrichment_map, open(DATA_DIR + "/" + data_set + "/" + str(test) + "CachedEnrichmentPValueSplit.pkl", 'wb'))
 
     gene_evaluation_median = {}
     gene_evaluation_full = {}
