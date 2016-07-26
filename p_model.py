@@ -74,6 +74,12 @@ def pmodel(dat1, priors, mode):
         p3 = p3 * hHigh.cdf(di)
 
     ptot = p1+p2+p3
+    #cheating!
+    if ptot == 0:
+        print("error! ptot is 0\t", p1, '\t', p2, '\t', p3) 
+        print(dat1)
+        return
+        ptot = 0.0001
     p1 /= ptot
     p2 /= ptot
     p3 /= ptot

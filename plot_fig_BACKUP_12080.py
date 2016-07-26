@@ -7,10 +7,15 @@ import pickle
 import cache_codec
 import numpy as np
 import matplotlib
+<<<<<<< HEAD
+matplotlib.use('Agg')
+from matplotlib import pyplot as plotter
+=======
 matplotlib.use("Agg")
 from matplotlib import pyplot as plotter
 
 enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/bayes_highCachedEnrichmentPValueSplit.pkl', 'rb'))
+>>>>>>> refs/remotes/origin/master
 
 #list of lists. each element is a list of 0's and 1's. 1 means the master gene was in the set at rank indicie + 1
 def get_ranking_data(enrichment_ranks):
@@ -177,6 +182,12 @@ enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/' + test+
                                     'CachedEnrichmentPValueSplit.pkl', 'rb'))
 
 ranking = get_ranking_data(enrichment_ranks)
+<<<<<<< HEAD
+make_graph_against_sets_picked_top("ERBB2", ranking, range(0, len(ranking["ERBB2"][0])), 'truesets')
+make_graph_against_sets_picked_top("SOX10", ranking, range(0, len(ranking["SOX10"][0])), 'truesets')
+make_graph_against_sets_all_top(ranking, range(0, len(ranking["SOX10"][0])), 'truesets')
+=======
 make_graph_against_sets_picked("ERBB2", ranking, range(0, len(ranking["ERBB2"][0])))
 make_graph_against_sets_picked("DAZ4", ranking, range(0, len(ranking["DAZ4"][0])))
 make_graph_against_sets_all(ranking, range(0, len(ranking["ERBB2"][0])))
+>>>>>>> refs/remotes/origin/master

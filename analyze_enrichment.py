@@ -64,6 +64,14 @@ def rank_by_t_test(enrichment_scores, phenotypes):
         scores = {}
         for gene_set in gene_sets:
             class0, class1 = analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set)
+            #sanitze nan. TODO: remove this later
+            for i in range(0, len(class0)):
+                if class0[i] is None:
+                    class0[i] = 0
+            for i in range(0, len(class1)):
+                if class1[i] is None:
+                    class1[i] = 0
+
             tstat, pvalue = stats.ttest_ind(class0, class1, nan_policy='raise', equal_var=False)
             scores[gene_set] = (abs(tstat), pvalue)
         rankings.append(scores)

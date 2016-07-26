@@ -79,6 +79,8 @@ def make_graph_against_sets_all(rankings, x_range):
     '''
     currently averages all sets across all genes
     '''
+    pop = 0
+
     y_tot_sets = []
     y_tot_hit = []
     for x in x_range:
@@ -110,71 +112,6 @@ def make_graph_against_sets_all(rankings, x_range):
     plotter.savefig("./Pictures/TotalAnalysis")
     plotter.close()
 
-
-def make_graph_against_sets_picked_top(gene, rankings, x_range, method):
-    '''
-    currently averages all sets across all genes
-    '''
-    gene_rank = rankings[gene]
-    pop = sum(gene_rank[0])
-    y_axis = []
-    for x in x_range:
-        y_local = 0
-        y_tot = 0
-        for trial in gene_rank:
-            picked_sets = sum(trial[:(x + 1)])
-
-            if picked_sets > 0:
-                y_local += 1
-            y_tot += 1
-        y_axis.append(y_local / y_tot)
-
-    x_axis = [x for x in x_range]
-    plotter.xlabel("Top # of sets picked")
-    plotter.ylabel("Proportion of Trials With True Gene Sets")
-    plotter.title(gene)
-
-    plotter.plot(x_axis, y_axis)
-    plotter.savefig("./Pictures/" + method + "Analysis_" + gene + " effectiveness: " + str(pop))
-    plotter.close()
-
-def make_graph_against_sets_all_top(rankings, x_range, method):
-    '''
-    currently averages all sets across all genes
-    '''
-    y_axis = []
-    for x in x_range:
-        y_tot_hits = 0
-        y_tot_sets = 0
-
-        for gene in rankings:
-            gene_rank = rankings[gene]
-            for trial in gene_rank:
-                picked_sets = sum(trial[:(x + 1)])
-
-                if picked_sets > 0:
-                    y_tot_hits += 1
-                y_tot_sets += 1
-        y_axis.append(y_tot_sets / y_tot_sets)
-
-    x_axis = [x for x in x_range]
-    plotter.plot(x_axis, y_axis, label='mean')
-
-    plotter.xlabel("Top # of sets picked")
-    plotter.ylabel("Proportion of True Gene Sets")
-    plotter.savefig("./Pictures/" + str(method) + "TotalAnalysis")
-    plotter.close()
-
-
-
-import sys
-test = str(sys.argv[1])
-if test == "":
-    print("Give a test set result!")
-    exit()
-
-enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/' + test+
-                                    'CachedEnrichmentPValueSplit.pkl', 'rb'))
 
 ranking = get_ranking_data(enrichment_ranks)
 make_graph_against_sets_picked("ERBB2", ranking, range(0, len(ranking["ERBB2"][0])))
