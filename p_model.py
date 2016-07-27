@@ -84,7 +84,7 @@ def pmodel(dat1, priors, mode):
     p2 /= ptot
     p3 /= ptot
     #print(dat1)
-    print("low  " + str(p1) + "mid  " + str(p2) + "high " + str(p3))
+    #print("low  " + str(p1) + "mid  " + str(p2) + "high " + str(p3))
 
     if mode == 'high':
         return(p3)

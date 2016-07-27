@@ -35,7 +35,7 @@ def get_ranking_data(enrichment_ranks):
 
     return ranks
 
-def make_graph_against_sets_picked(gene, rankings, x_range):
+def make_graph_against_sets_picked(gene, rankings, x_range, test):
     '''
     currently averages all sets for a single gene
     '''
@@ -70,10 +70,10 @@ def make_graph_against_sets_picked(gene, rankings, x_range):
     plotter.plot(x_axis, y_worst, label='worse')
     plotter.legend(loc='upper left')
 
-    plotter.savefig("./Pictures/Analysis_" + gene + " popularity: " + str(pop))
+    plotter.savefig("./Pictures/" + test + "Analysis_" + gene + " popularity: " + str(pop))
     plotter.close()
 
-def make_graph_against_sets_all(rankings, x_range):
+def make_graph_against_sets_all(rankings, x_range, test):
     '''
     currently averages all sets across all genes
     '''
@@ -105,7 +105,7 @@ def make_graph_against_sets_all(rankings, x_range):
 
     plotter.xlabel("Top # of sets picked")
     plotter.ylabel("Proportion of True Gene Sets")
-    plotter.savefig("./Pictures/TotalAnalysis")
+    plotter.savefig("./Pictures/" + test + "TotalAnalysis")
     plotter.close()
 
 
@@ -128,6 +128,7 @@ def make_graph_against_sets_picked_top(gene, rankings, x_range, method):
         y_axis.append(y_local / y_tot)
 
     x_axis = [x for x in x_range]
+    plotter.axis([0, len(x_axis), 0, 1.0])
     plotter.xlabel("Top # of sets picked")
     plotter.ylabel("Proportion of Trials With True Gene Sets")
     plotter.title(gene)
@@ -153,11 +154,14 @@ def make_graph_against_sets_all_top(rankings, x_range, method):
                 if picked_sets > 0:
                     y_tot_hits += 1
                 y_tot_sets += 1
-        y_axis.append(y_tot_sets / y_tot_sets)
 
+        y_axis.append(y_tot_hits / y_tot_sets)
+
+    print(y_axis)
     x_axis = [x for x in x_range]
     plotter.plot(x_axis, y_axis, label='mean')
 
+    plotter.axis([0, len(x_axis), 0, 1])
     plotter.xlabel("Top # of sets picked")
     plotter.ylabel("Proportion of True Gene Sets")
     plotter.savefig("./Pictures/" + str(method) + "TotalAnalysis")
@@ -166,15 +170,13 @@ def make_graph_against_sets_all_top(rankings, x_range, method):
 
 
 import sys
-test = str(sys.argv[1])
-if test == "":
+if len(sys.argv) < 2 or sys.argv[1] == "":
     print("Give a test set result!")
     exit()
 
-enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/' + test+
-                                    'CachedEnrichmentPValueSplit.pkl', 'rb'))
+test = sys.argv[1]
+enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/' + test +  'CachedEnrichmentPValueSplit.pkl', 'rb'))
 
 ranking = get_ranking_data(enrichment_ranks)
-make_graph_against_sets_picked_top("ERBB2", ranking, range(0, len(ranking["ERBB2"][0])), 'truesets')
-make_graph_against_sets_picked_top("SOX10", ranking, range(0, len(ranking["SOX10"][0])), 'truesets')
-make_graph_against_sets_all_top(ranking, range(0, len(ranking["SOX10"][0])), 'truesets')
+make_graph_against_sets_picked_top("ERBB2", ranking, range(0, 50), test)
+make_graph_against_sets_all_top(ranking, range(0, 50), test)

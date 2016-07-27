@@ -684,7 +684,7 @@ def load_bayes_scores(dataset, mode):
     print("\tCalculating enrichment data!")
     dump_bayes_scores(dataset, mode)
     print("\tSaving enrichment data!")
-    return load_bayes_scores(dataset)
+    return load_bayes_scores(dataset, mode)
 
 '''
 Null enrichment

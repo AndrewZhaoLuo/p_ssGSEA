@@ -114,7 +114,7 @@ def run_analysis_on_dataset(NUM_PROCESSES, data_set, n, pheno_sample, gene_optio
 
     #print out final rankings
     sorted_genes = sorted(gene_evaluation_median, key=gene_evaluation_median.get)
-    f = open('results_rankings.txt','w')
+    f = open(test + 'results_rankings.txt','w')
     f.write("Gene\tMedian Rank\tFull Ranks\n")
     for gene in sorted_genes:
         f.write(str(gene) + "\t" + str(gene_evaluation_median[gene]) + "\t" + str(gene_evaluation_full[gene]) + "\n")
