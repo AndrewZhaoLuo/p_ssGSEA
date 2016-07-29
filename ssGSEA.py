@@ -27,28 +27,41 @@ def calculate_enrichment_score(gene_set, expressions, omega):
               result closer to GSEA, take the max of the values in the array
     """
     #list of keys in order to parse to get low -> high values
-    keys_sorted = sorted(expressions, key=expressions.get)
+    #print(expressions)
+    #print(gene_set)
+    keys_sorted = sorted(expressions, key=expressions.get, reverse=True)
 
     #running summations of the PGW and PNG scores in the Barbie et al 2009 paper's algo. desc.
     P_GW_numerator = 0
     #dead_genes = [x for x in gene_set if x not in expressions.keys()]
     #print(dead_genes)
-    P_GW_denominator = sum([abs(expressions[gene]) ** omega for gene in gene_set])
+    #P_GW_denominator = sum([abs(expressions[gene]) ** omega for gene in gene_set])
+    #P_GW_denominator = sum([i ** omega for i in range(1, len(expressions) - len(gene_set) + 1)])
+    P_GW_denominator = 0
+    i = 1
+    for gene in keys_sorted:
+        if gene in gene_set:
+            P_GW_denominator += i ** omega
+            #print(P_GW_denominator)
+        i += 1
+
     P_GW = lambda : P_GW_numerator / P_GW_denominator
 
-    P_NG_numerator = 1
+    P_NG_numerator = 0
     P_NG_denominator = len(expressions) - len(gene_set)
     P_NG = lambda : P_NG_numerator / P_NG_denominator
 
+    i = 1 #current index in the rank-norm traversal
     scores = []
     for gene in keys_sorted:
         #hitting a gene in the gene set
         if gene in gene_set:
-            P_GW_numerator += abs(expressions[gene]) ** omega
+            P_GW_numerator += i ** omega #abs(expressions[gene]) ** omega
         else:
             P_NG_numerator += 1
 
         scores.append(P_GW() - P_NG())
+        i += 1
 
     return scores
 

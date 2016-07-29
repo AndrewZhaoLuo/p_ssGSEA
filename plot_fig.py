@@ -70,7 +70,7 @@ def make_graph_against_sets_picked(gene, rankings, x_range, test):
     plotter.plot(x_axis, y_worst, label='worse')
     plotter.legend(loc='upper left')
 
-    plotter.savefig("./Pictures/" + test + "Analysis_" + gene + " popularity: " + str(pop))
+    plotter.savefig("./Pictures/" + test + "AnalysisWeak_" + gene + " popularity: " + str(pop))
     plotter.close()
 
 def make_graph_against_sets_all(rankings, x_range, test):
@@ -105,7 +105,7 @@ def make_graph_against_sets_all(rankings, x_range, test):
 
     plotter.xlabel("Top # of sets picked")
     plotter.ylabel("Proportion of True Gene Sets")
-    plotter.savefig("./Pictures/" + test + "TotalAnalysis")
+    plotter.savefig("./Pictures/" + test + "WeakTotalAnalysis")
     plotter.close()
 
 
@@ -178,5 +178,7 @@ test = sys.argv[1]
 enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/' + test +  'CachedEnrichmentPValueSplit.pkl', 'rb'))
 
 ranking = get_ranking_data(enrichment_ranks)
+make_graph_against_sets_picked("ERBB2", ranking, range(0, 50), test)
+make_graph_against_sets_all(ranking, range(0, 50), test)
 make_graph_against_sets_picked_top("ERBB2", ranking, range(0, 50), test)
 make_graph_against_sets_all_top(ranking, range(0, 50), test)

@@ -555,11 +555,13 @@ def dump_ssGSEA_scores(dataset):
     #for each gene set
     count = counter()
     for set in gene_sets.keys():
+    #for set in [key for key in gene_sets.keys() if key == "FARMER_BREAST_CANCER_CLUSTER_6"]:
         gene_set = gene_sets[set].genes
 
         #go through all the samples and calculate the ES
         scores = {}
         for id in samples.keys():
+        #for id in [key for key in samples.keys() if key == 38]:
             profile = samples[id].profiles
             expressions = {}
 
