@@ -20,13 +20,20 @@ def get_ranking_data(enrichment_ranks):
         print(gene)
         ranks[gene] = []
         p_values_gene = enrichment_ranks[gene]
+
+        good_sets = {1}
+        good_sets.clear()
+        for set in gene_sets:
+            if gene in gene_sets[set].genes:
+                good_sets.add(set)
+
         for trial in p_values_gene:
             trial_rank = []
 
             #iterator that goes through sets in increasing order of tstat
-            sorted_gene_sets = sorted(trial, key=trial.get)
+            sorted_gene_sets = sorted(trial, key=trial.get, reverse=True)
             for set in sorted_gene_sets:
-                if gene in gene_sets[set].genes:
+                if set in good_sets:
                    trial_rank.append(1)
                 else:
                     trial_rank.append(0)
@@ -178,6 +185,8 @@ test = sys.argv[1]
 enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/' + test +  'CachedEnrichmentPValueSplit.pkl', 'rb'))
 
 ranking = get_ranking_data(enrichment_ranks)
+#print(ranking[0]["ERBB2"])
+
 make_graph_against_sets_picked("ERBB2", ranking, range(0, 50), test)
 make_graph_against_sets_all(ranking, range(0, 50), test)
 make_graph_against_sets_picked_top("ERBB2", ranking, range(0, 50), test)
