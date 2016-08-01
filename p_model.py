@@ -37,6 +37,8 @@
 
 from scipy.stats import beta
 import numpy as np
+from math import e
+from math import log
 
 hLow = beta(0.5,2)
 hMid = beta(2,2)
@@ -63,35 +65,29 @@ def pmodel(dat1, priors, mode):
     p3 = priors[2] # h3
 
     for di in dat1:
-        #Prevent rounding of data points from falling outside of range of algo
-        if di == 1:
-            di = 0.999
         if di == 0:
-            di = 0.001
-
-        p1 = p1 * hLow.sf(di)
-        p2 = p2 * min(hMid.sf(di), hMid.cdf(di)) * 2.0
-        p3 = p3 * hHigh.cdf(di)
-
-    ptot = p1+p2+p3
-    #cheating!
-    if ptot == 0:
-        print("error! ptot is 0\t", p1, '\t', p2, '\t', p3) 
-        print(dat1)
-        return
-        ptot = 0.0001
-    p1 /= ptot
-    p2 /= ptot
-    p3 /= ptot
-    #print(dat1)
-    #print("low  " + str(p1) + "mid  " + str(p2) + "high " + str(p3))
+            di = 0.01
+        if di == 1:
+            di = 0.99
+        #print(p1,'\t', p2,'\t', p3)
+        p1 = p1 * (hLow.sf(di))
+        p2 = p2 * (min(hMid.sf(di), hMid.cdf(di)) * 2.0)
+        p3 = p3 * (hHigh.cdf(di))
+        
+        ptot = p1 + p2 + p3
+        if ptot == 0:
+            print(p1, '\t', p2, '\t', p3)
+            print(dat1)
+            exit()
+        p1 /= ptot
+        p2 /= ptot
+        p3 /= ptot
 
     if mode == 'high':
         return(p3)
     elif mode == 'low':
         return(p1)
-    else:
-        return(p2)
+    return(p2)
 '''
 ########################################
 dat2 = [-0.3, 0.4, 0.44, 0.33]

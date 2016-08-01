@@ -657,7 +657,7 @@ def dump_bayes_scores(dataset, mode):
                     #-.0001 because rounding to 1 = nan values
                     expressions.append((profile[gene].intensity - min_negative_expression[gene]) / (max_expression[gene] - min_negative_expression[gene]))
 
-            score = pmodel(expressions, [0.33 , 0.33, 0.33], mode)
+            score = pmodel(expressions, [1/3 , 1/3, 1/3], mode)
             if str(score) == 'nan':
                 print(expressions)
             scores[id] = score
