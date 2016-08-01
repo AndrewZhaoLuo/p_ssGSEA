@@ -43,6 +43,7 @@ def calculate_enrichment_score(gene_set, expressions, omega):
     i = 1
     for gene in keys_sorted:
         if gene in gene_set:
+
             P_GW_denominator += i ** omega
             #print(P_GW_denominator)
         i += 1

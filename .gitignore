@@ -1,5 +1,5 @@
 #ignore output
-stdout.txt
+*.txt
 
 #ignore virtual enviroment
 venv/

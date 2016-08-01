@@ -289,7 +289,7 @@ def dump_filtered_gene_sets(dataset):
     for set_name in gene_sets:
         cur_set = gene_sets[set_name]
         new_genes = {gene for gene in cur_set.genes if gene in valid_genes}
-        if len(new_genes) > 0:
+        if len(new_genes) > 5 and len(new_genes) < 100:
             filtered_sets[set_name] = gene_set(set_name, cur_set.url, new_genes)
         print("\t\tProcessed set " + str(count.count()) + " out of " + str(len(gene_sets)))
 
@@ -561,7 +561,7 @@ def dump_ssGSEA_scores(dataset):
         #go through all the samples and calculate the ES
         scores = {}
         for id in samples.keys():
-        #for id in [key for key in samples.keys() if key == 38]:
+        #for id in [38, 148, 179, 323, 378, 401, 271]:
             profile = samples[id].profiles
             expressions = {}
 

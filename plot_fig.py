@@ -12,7 +12,7 @@ from matplotlib import pyplot as plotter
 
 #list of lists. each element is a list of 0's and 1's. 1 means the master gene was in the set at rank indicie + 1
 def get_ranking_data(enrichment_ranks):
-    gene_sets = cache_codec.load_all_gene_sets()
+    gene_sets = cache_codec.load_filtered_gene_sets('BC')
 
     ranks = {}
 
