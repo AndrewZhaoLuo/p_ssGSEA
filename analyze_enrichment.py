@@ -29,7 +29,7 @@ def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
     class0 = []
     class1 = []
 
-    for id in phenotype.keys():
+    for id in set_scores.keys():
         if phenotype[id] == 0:
             class0.append(set_scores[id])
         else:
