@@ -534,10 +534,10 @@ def load_sim_phenotype_keyed(dataset, n, master_gene):
 '''
 ssGSEA_SCORES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
 
-ssGSEA_SCORES_FILES = lambda dataset: ssGSEA_SCORES_DIR(dataset) + dataset + "_ssGSEAScores.pkl"
+ssGSEA_SCORES_FILES = lambda dataset, tag: ssGSEA_SCORES_DIR(dataset) + tag + dataset + "_ssGSEAScores.pkl"
 '''Returns the path used to cache/uncache gene enrichment scores per id'''
 from ssGSEA import calculate_enrichment_score
-def dump_ssGSEA_scores(dataset):
+def dump_ssGSEA_scores(dataset, tag):
     """
     For every id and good gene set of the given dataset, dumps enrichment score information. Specifically dumps
     a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set.
@@ -550,6 +550,10 @@ def dump_ssGSEA_scores(dataset):
 
     gene_sets = load_filtered_gene_sets(dataset)
     samples = load_sample_profiles(dataset)
+
+    if tag == 'null':
+        print("Simulating null hypothesis...")
+        scramble_sample(samples)
 
     paths = {}
     #for each gene set
@@ -578,10 +582,10 @@ def dump_ssGSEA_scores(dataset):
 
         print("\t\tScores for set " + str(count.count()) + " done out of " + str(len(gene_sets.keys())))
 
-    pickle.dump(paths, open(ssGSEA_SCORES_FILES(dataset), 'wb'))
+    pickle.dump(paths, open(ssGSEA_SCORES_FILES(dataset, tag), 'wb'))
 
 @lru_cache(maxsize=16)
-def load_ssGSEA_scores(dataset):
+def load_ssGSEA_scores(dataset, tag=''):
     '''
     Returns a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set
 
@@ -591,23 +595,23 @@ def load_ssGSEA_scores(dataset):
     :returns: a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores
     '''
 
-    if os.path.exists(ssGSEA_SCORES_FILES(dataset)):
+    if os.path.exists(ssGSEA_SCORES_FILES(dataset, tag)):
         print("\tOpenning cached enrichment sets!")
-        return pickle.load(open(ssGSEA_SCORES_FILES(dataset), 'rb'))
+        return pickle.load(open(ssGSEA_SCORES_FILES(dataset, tag), 'rb'))
 
     print("\tCalculating enrichment data!")
-    dump_ssGSEA_scores(dataset)
+    dump_ssGSEA_scores(dataset, tag)
     print("\tSaving enrichment data!")
-    return load_ssGSEA_scores(dataset)
+    return load_ssGSEA_scores(dataset, tag)
 
 '''
 ****************************Bayes Phenotypes****************************
 '''
 BAYES_SCORES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
-BAYES_SCORES_FILE = lambda dataset, mode: BAYES_SCORES_DIR(dataset) + dataset + "_" + str(mode) + "_BayesHighScores.pkl"
+BAYES_SCORES_FILE = lambda dataset, mode, tag: BAYES_SCORES_DIR(dataset) + tag + dataset + "_" + str(mode) + "_BayesHighScores.pkl"
 '''Returns the path used to cache/uncache gene enrichment scores per id'''
 from p_model import pmodel
-def dump_bayes_scores(dataset, mode):
+def dump_bayes_scores(dataset, mode, tag):
     """
     For every id and good gene set of the given dataset, dumps enrichment score information. Specifically dumps
     a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set.
@@ -620,6 +624,10 @@ def dump_bayes_scores(dataset, mode):
 
     gene_sets = load_filtered_gene_sets(dataset)
     samples = load_sample_profiles(dataset)
+
+    if tag == 'null':
+        print("Simulating null hypothesis...")
+        scramble_sample(samples)
 
     max_expression = {}
     min_negative_expression = {}
@@ -666,10 +674,10 @@ def dump_bayes_scores(dataset, mode):
 
         print("\t\tScores for set " + str(count.count()) + " done out of " + str(len(gene_sets.keys())))
 
-    pickle.dump(paths, open(BAYES_SCORES_FILE(dataset, mode), 'wb'))
+    pickle.dump(paths, open(BAYES_SCORES_FILE(dataset, mode, tag), 'wb'))
 
 @lru_cache(maxsize=16)
-def load_bayes_scores(dataset, mode):
+def load_bayes_scores(dataset, mode, tag=''):
     '''
     Returns a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set
 
@@ -679,29 +687,33 @@ def load_bayes_scores(dataset, mode):
     :returns: a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores
     '''
 
-    if os.path.exists(BAYES_SCORES_FILE(dataset, mode)):
+    if os.path.exists(BAYES_SCORES_FILE(dataset, mode, tag)):
         print("\tOpenning cached enrichment sets!")
-        return pickle.load(open(BAYES_SCORES_FILE(dataset, mode), 'rb'))
+        return pickle.load(open(BAYES_SCORES_FILE(dataset, mode, tag), 'rb'))
 
     print("\tCalculating enrichment data!")
-    dump_bayes_scores(dataset, mode)
+    dump_bayes_scores(dataset, mode, tag)
     print("\tSaving enrichment data!")
-    return load_bayes_scores(dataset, mode)
+    return load_bayes_scores(dataset, mode, tag)
 
 '''
 Null enrichment
 '''
 NULL_SCORES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
-NULL_SCORES_FILE = lambda dataset: NULL_SCORES_DIR(dataset) + dataset + "_"  + "_NullHighScores.pkl"
-def dump_null_scores(dataset):
+NULL_SCORES_FILE = lambda dataset, tag: NULL_SCORES_DIR(dataset) + tag + dataset + "_"  + "_NullHighScores.pkl"
+def dump_null_scores(dataset, tag):
     '''
     Dumps a dictionary mapping gene set to a dicitonary mapping id's to enrichment scores for that set (random scorse)
     '''
     if not os.path.exists(NULL_SCORES_DIR(dataset)):
-        os.makedirs(NULL_SCORES_DIR(dataset))
+        os.makedirs(NULL_SCORES_DIR(datase))
 
     gene_sets = load_filtered_gene_sets(dataset)
     samples = load_sample_profiles(dataset)
+
+    if tag == 'null':
+        print("Simulating null hypothesis")
+        scramble_sample(samples)
 
     random_scores = {}
     for set in gene_sets.keys():
@@ -712,18 +724,32 @@ def dump_null_scores(dataset):
 
         random_scores[set] = local_scores
 
-    pickle.dump(random_scores, open(NULL_SCORES_FILE(dataset), 'wb'))
+    pickle.dump(random_scores, open(NULL_SCORES_FILE(dataset, tag), 'wb'))
 
 @lru_cache(maxsize=16)
-def load_null_scores(dataset):
-    if os.path.exists(NULL_SCORES_FILE(dataset)):
+def load_null_scores(dataset, tag=''):
+    if os.path.exists(NULL_SCORES_FILE(dataset, tag)):
         print("\tOpenning cached enrichment sets!")
-        return pickle.load(open(NULL_SCORES_FILE(dataset), 'rb'))
+        return pickle.load(open(NULL_SCORES_FILE(dataset, tag), 'rb'))
 
     print("\tCalculating enrichment data!")
-    dump_null_scores(dataset)
+    dump_null_scores(dataset, tag)
     print("\tSaving enrichment data!")
-    return load_null_scores(dataset)
+    return load_null_scores(dataset, tag)
+
+'''
+For null tests given a map of ids to sample_profile objects, will scramble the gene labels for expression levels
+'''
+def scramble_sample(samples):
+    import random
+    for id in samples:
+        sample = samples[id]
+        profiles = sample.profiles
+
+        profile_scores = random.shuffle([profiles[gene].intensity for gene in profiles])
+
+        for profile in profiles:
+            profile.intensity = profile_scores.pop()
 
 if __name__ == "__main__":
     g = load_sample_profiles("BC")

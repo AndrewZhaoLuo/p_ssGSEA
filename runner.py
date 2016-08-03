@@ -50,6 +50,10 @@ def run_analysis_on_dataset(NUM_PROCESSES, data_set, n, pheno_sample, gene_optio
         enrichment_scores = load_bayes_scores(data_set, 'high')
     elif test == "null":
         enrichment_scores = load_null_scores(data_set)
+    elif test == "bayes_mid_null":
+        enrichment_scores = load_bayes_scores(data_set, 'mid', 'null')
+    elif test == "ssGSEA_null":
+        enrichment_scores = load_ssGSEA_scores(data_set, 'null')
     else:
         print("ERROR, invalid enrichment test!")
         return
