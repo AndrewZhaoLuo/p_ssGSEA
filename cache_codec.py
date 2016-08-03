@@ -454,7 +454,7 @@ def load_best_models(dataset, num_bins, genes_per_bin):
     print("\tCalculating best models!")
     dump_best_models(dataset, num_bins, genes_per_bin)
     print("\tSaving best models!")
-    return load_all_gene_sets()
+    return load_best_models(dataset, num_bins, genes_per_bin)
 
 '''
 ****************************Simulating Phenotypes****************************
@@ -743,13 +743,15 @@ For null tests given a map of ids to sample_profile objects, will scramble the g
 def scramble_sample(samples):
     import random
     for id in samples:
+        print("\tScrambling sample id", id)
         sample = samples[id]
         profiles = sample.profiles
 
-        profile_scores = random.shuffle([profiles[gene].intensity for gene in profiles])
+        profile_scores = [profiles[gene].intensity for gene in profiles]
+        random.shuffle(profile_scores)
 
-        for profile in profiles:
-            profile.intensity = profile_scores.pop()
+        for gene in profiles:
+            profiles[gene].intensity = profile_scores.pop()
 
 if __name__ == "__main__":
     g = load_sample_profiles("BC")
