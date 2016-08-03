@@ -185,9 +185,15 @@ test = sys.argv[1]
 enrichment_ranks = pickle.load(open(os.getcwd() + '/Data/AppCache/BC/' + test +  'CachedEnrichmentPValueSplit.pkl', 'rb'))
 
 ranking = get_ranking_data(enrichment_ranks)
+#print(len(ranking))
+#print(ranking.keys())
 #print(ranking[0]["ERBB2"])
+all_genes = ranking.keys()
+print(len(all_genes))
+for gene in all_genes:
+    make_graph_against_sets_picked_top(gene, ranking, range(0, 100), test)    
 
-make_graph_against_sets_picked("ERBB2", ranking, range(0, 50), test)
+#make_graph_against_sets_picked("ERBB2", ranking, range(0, 50), test)
 make_graph_against_sets_all(ranking, range(0, 50), test)
-make_graph_against_sets_picked_top("ERBB2", ranking, range(0, 50), test)
+#make_graph_against_sets_picked_top("ERBB2", ranking, range(0, 50), test)
 make_graph_against_sets_all_top(ranking, range(0, 50), test)
