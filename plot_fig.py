@@ -134,7 +134,7 @@ def make_graph_against_sets_picked_top(gene, rankings, x_range, method):
             y_tot += 1
         y_axis.append(y_local / y_tot)
 
-    x_axis = [x for x in x_range]
+    x_axis = [x + 1 for x in x_range]
     plotter.axis([0, len(x_axis), 0, 1.0])
     plotter.xlabel("Top # of sets picked")
     plotter.ylabel("Proportion of Trials With True Gene Sets")
@@ -165,7 +165,7 @@ def make_graph_against_sets_all_top(rankings, x_range, method):
         y_axis.append(y_tot_hits / y_tot_sets)
 
     print(y_axis)
-    x_axis = [x for x in x_range]
+    x_axis = [x + 1 for x in x_range]
     plotter.plot(x_axis, y_axis, label='mean')
 
     plotter.axis([0, len(x_axis), 0, 1])
