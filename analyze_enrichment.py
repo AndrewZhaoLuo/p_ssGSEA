@@ -1,5 +1,5 @@
 '''
-This file contains methods for analyzing phenotype and enrichment scores across certain gene_sets
+This file contains methods for analyzing enrichment scores for gene_sets across phenotypes
 '''
 
 import scipy.stats as stats
@@ -7,20 +7,20 @@ from cache_codec import counter
 
 def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
     '''
-    Given a series of enrichment scores and phenotypes, returns a tuple of lists representing the
-    enrichment for class 0/1 phenotypes
+    Given a series of enrichment scores and phenotypes, returns a pair of lists where each list contains the
+    enrichment scores for class 0/1 phenotypes
 
-    :param enrichment_scores: a mapping of gene_set names to a dict mapping id's to the corresponding enrichment score for \
+    :param enrichment_scores: a mapping of gene_sets to a mapping of id's to the enrichment score for
     the gene_set
     :type enrichment_scores: dict
 
-    :param phenotype: a mapping of sample id's to the sample's phenotype, either 0 or 1
+    :param phenotype: a mapping of id's to the sample's phenotype, either 0 or 1s
     :type phenotype: dict
 
-    :param gene_set: the name of the geneset to check enrichment score distribution
+    :param gene_set: the name of the geneset to return enrichment scores broken down by class
     :type gene_set: str
 
-    :returns: a tuple in the form (c0. c1) where c0/1 is a list of enrichment scores for class0/class1 respectively
+    :returns: a tuple in the form (c0, c1) where c0/1 is a list of enrichment scores for class0/class1 samples
     '''
 
     set_scores = enrichment_scores[gene_set]
@@ -29,7 +29,7 @@ def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
     class0 = []
     class1 = []
 
-    for id in phenotype.keys():
+    for id in phenotype:
         if phenotype[id] == 0:
             class0.append(set_scores[id])
         else:
@@ -39,11 +39,11 @@ def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
 
 def rank_by_t_test(enrichment_scores, phenotypes):
     '''
-    Given a map of gene_sets to a dictionary mapping id's to enrichment scores for a gene set, and a list of dictionaries
+    Given a map of gene_sets to a mapping of id's to enrichment scores for a gene set, and a list of dictionaries
     mapping id's to phenotype class 0 or 1, each element of the list representing a trial of simulated phenotype,
     returns a list, one element for every trial of simulated phenotype, where each element is a map of gene_set names
     to a tuple in the form (a, b) where a is the t-score found by comparing the distributions of enrichment scores
-    found between samples with different phenotype classes and b is the p-value
+    found between samples with different phenotype classes and b is the p-value. Uses a welch's t-test.
 
     :param enrichment_scores: a mapping of gene_set names to a dictionary mapping id's to their enrichment scores for \
     the gene_set
@@ -53,7 +53,7 @@ def rank_by_t_test(enrichment_scores, phenotypes):
     Each map represents a series of simulated phenotypes
     :type phenotypes: dict
 
-    :returns: a list of maps, mapping gene_sets to a tuple of representing t-score and p-value
+    :returns: a list of maps, one per trial in phenotypes, mapping gene_sets to a tuple of representing t-score and p-value
     '''
     gene_sets = enrichment_scores.keys()
 
@@ -62,36 +62,32 @@ def rank_by_t_test(enrichment_scores, phenotypes):
     for trial in range(0, len(phenotypes)):
         phenotype = phenotypes[trial]
         scores = {}
+
+        #rank gene sets per trial
         for gene_set in gene_sets:
             class0, class1 = analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set)
-            #sanitze nan. TODO: remove this later
-            for i in range(0, len(class0)):
-                if class0[i] is None:
-                    class0[i] = 0
-            for i in range(0, len(class1)):
-                if class1[i] is None:
-                    class1[i] = 0
 
             tstat, pvalue = stats.ttest_ind(class0, class1, nan_policy='raise', equal_var=False)
             scores[gene_set] = (abs(tstat), pvalue)
         rankings.append(scores)
+
         print("\t\tFinished t test for trial " + count.count() + " out of " + str(len(phenotypes)))
 
     return rankings
 
 def rank_by_t_test_keyed(enrichment_scores, phenotypes, master_gene):
     '''
-    As above, but returns a map mapping master_gene to the results
+    As rank_by_t_test, but returns a map mapping of the given master_gene to the results.
     '''
     print("\tRunning T-Test " + master_gene)
     return {master_gene: rank_by_t_test(enrichment_scores, phenotypes)}
 
 def evaluate_rankings(rankings, gene_sets, master_gene):
     '''
-    Given a list of dicts mapping gene_set to a tuple describing t-statistic and p-value, returns the ranking's
-    ability at including the master_gene in the top sets.
+    Given a list of mappings of gene_set to a tuple describing t-statistic and p-value (like returned by rank_by_t_test),
+    returns the ranking's ability at including the master_gene in the top sets.
 
-    ToDo: refine ranking
+    Note: currently not important! ToDo: update ranking method
 
     :param rankings: a list mapping of gene_sets to tuples containg the tstatistic and pvalue of the gene set in \
     seperating the two classes
@@ -106,17 +102,18 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
     :returns: a list, with each element being the "score" calculated on the ranking of the master_gene in the given \
     rankings
     '''
+
+    #current method for determining the avg. placement of master genes
     def linear_method(ranking):
         # parse gene_sets in order from high tstat to low
         sorted_sets = sorted(ranking, key=ranking.get, reverse=True)
-        #for set in sorted_sets:
-        #    print(ranking[set])
 
         # for scores for every gene ranking
         running_scores = {}
         # number of times gene appears in list of sets
         set_count = {}
 
+        #ranking of the current parsed gene set
         i = 0
         for set in sorted_sets:
             i += 1
@@ -140,6 +137,8 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
     for ranking in rankings:
         scores = linear_method(ranking)
         sorted_genes = sorted(scores, key=scores.get)
+
+        #rank of the genes
         i = 0
         for gene in sorted_genes:
             i += 1
@@ -150,7 +149,7 @@ def evaluate_rankings(rankings, gene_sets, master_gene):
 
 def evaluate_rankings_keyed(rankings, gene_sets, master_gene):
     '''
-    As above, but returns the value keyed to the master_gene
+    As above, but returns the value in a map keyed to the given master_gene
     '''
     print("\tRanking gene " + master_gene)
     return {master_gene: evaluate_rankings(rankings, gene_sets, master_gene)}
