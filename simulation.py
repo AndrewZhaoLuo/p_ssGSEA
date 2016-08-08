@@ -1,19 +1,10 @@
 '''
 This module contains methods for simulating data given a hybrid data model
 '''
-import pickle
 import random
 from scipy.stats import norm
 
-'''
-Given a master_gene's model and a list of sample profiles, returns a
-map of sample_nums -> phenotype classifications for this set.
 
-0 = peak with peak lower on x axis
-1 = peak with peak higher on x axis
-
-n samples specifically
-'''
 def simulate_data(models, master_gene_name, sample_profiles, n):
     """
     Given a list of gaussian mixture models for genes, a master gene, and a list of sample profiles,
@@ -23,10 +14,10 @@ def simulate_data(models, master_gene_name, sample_profiles, n):
 
     :requires: n is positive and less than or equal to len(sample_profiles)
 
-    :param models: a dictionary of strings as gene names to the gaussian mixture model (GMM) for each gene.
+    :param models: a mapping of gene names to the gaussian mixture model (GMM) for each gene.
     :type models: dict
-
-    :param master_gene_name: the gene to be used as the maste gene for phenotype simulation
+mean
+    :param master_gene_name: the gene to be used as the master gene for phenotype simulation
     :type master_gene_name: str
 
     :param sample_profiles: a list of samples (data_models.sample)
@@ -37,7 +28,7 @@ def simulate_data(models, master_gene_name, sample_profiles, n):
 
     :return: a dict mapping sample id's to phenotype classes. This phenotype does not necessarily correspond
              to any real phenotype but rather the components of the mixture model of the master gene. class 0 represents
-             the distribution with a smaller mean while class 1 represents the one with the larger mean.
+             the component in the model with a smaller expression mean while class 1 represents the one with the larger.
     """
 
     master_gene_model = models[master_gene_name]
@@ -84,10 +75,3 @@ def simulate_data(models, master_gene_name, sample_profiles, n):
             classifications[id] = 0
 
     return classifications
-if __name__ == "__main__":
-    import cache_codec
-    phenos = cache_codec.load_sim_phenotypes("BC", 100, "ERBB2")
-    print(phenos)
-    print(phenos[0])
-
-
