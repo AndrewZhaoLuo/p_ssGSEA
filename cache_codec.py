@@ -1,7 +1,10 @@
 '''
-This module handles caching and uncaching data using pickle, as well as deciding when to cache/uncache data
+This module handles caching and uncaching of data using pickle.
 
-General ToDo: better RAM caching
+In the future, it might be prudent to use a less memory intensive object serialization method like hdf5.
+
+Furthermore, caching (to minimize read-writes) is currently done through a lru policy with a size of 16. A size of 1
+is more appropriate for most of the applications.
 '''
 
 import os
@@ -11,6 +14,11 @@ from data_models import *
 from functools import lru_cache
 
 class counter():
+    '''
+    This class is a simple counter which can increment and return a count, initially set to 0.
+    This is used for keeping track of progress of the various tasks going on.
+    '''
+
     def __init__(self):
         self.i = 0
 
@@ -21,8 +29,15 @@ class counter():
     def __str__(self):
         return str(self.i)
 
+#DEFINE NEW DATASET ABBREVIATIONS HERE
 DATASETS = {"BC"}
+
+#CHange this to change the directory will data dumps will be stored and read from
 DATA_DIR = os.getcwd() + "/Data/AppCache"
+
+'''
+****************************Downloading expression data****************************
+'''
 
 EXPRESSION_PROFILES_DIR = lambda dataset: DATA_DIR + "/" + dataset + "/"
 '''Returns the path of the directory where the Expression profile lives'''
@@ -40,6 +55,8 @@ def dump_sample_profiles(dataset):
     '''
     Queries the database of the given dataset and dumps a pickled file containing gene expression data. The pickled
     file will contain a dictionary mapping patient id's to a data_models.sample (sample profile).
+
+    NOTE: remember to create the proper corresponding database for the dataset!!!
 
     :param dataset: the name of the dataset downloading data from
     :type dataset: str
@@ -152,7 +169,7 @@ def load_gene_models(dataset):
     return load_gene_models(dataset)
 
 '''
-****************************Gene popularity loading****************************
+****************************Gene popularity****************************
 '''
 GENE_SET_DB = DATA_DIR + "/GeneSets.db"
 GENE_SET_GENE_TABLE = "GeneSet_Genes"
@@ -269,7 +286,8 @@ FILTERED_GENE_SET_FILE = lambda dataset: FILTERED_GENE_SET_DIR(dataset) + datase
 def dump_filtered_gene_sets(dataset):
     '''
     Given the genes in a dataset, dumps gene_sets made from all the gene_sets filtered so only genes which appear in
-    the dataset are present in the gene_sets. gene_sets with no genes left are removed
+    the dataset are present in the gene_sets. gene_sets with no genes left are removed. After this filtering process,
+    removes all sets less than 5 genes or more than 100 genes.
 
     :param dataset: the name of the dataset downloading data from
     :type dataset: str
@@ -499,8 +517,7 @@ def dump_sim_phenotypes(dataset, n, master_gene):
 
     pickle.dump(data_sets, open(PHENOTYPE_SIMS_FILE(dataset, n, master_gene), 'wb'))
 
-#breaks multithreading -> messes up their pickling
-#@lru_cache(maxsize=16)
+@lru_cache(maxsize=16)
 def load_sim_phenotypes(dataset, n, master_gene):
     '''
     Returns the a set of n simulated phenotypes using the given mastergene, caching data along the way
@@ -525,7 +542,7 @@ def load_sim_phenotypes(dataset, n, master_gene):
 
 def load_sim_phenotype_keyed(dataset, n, master_gene):
     '''
-    As above, but returns as entry in dict with key as master_gene
+    As above, but returns as entry in dict with key as given master_gene. This is for parallelization
     '''
 
     return {master_gene: load_sim_phenotypes(dataset, n, master_gene)}
@@ -540,7 +557,8 @@ from ssGSEA import calculate_enrichment_score
 def dump_ssGSEA_scores(dataset, tag):
     """
     For every id and good gene set of the given dataset, dumps enrichment score information. Specifically dumps
-    a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set.
+    a dictionary mapping gene set names to a dictionary mapping id's to enrichment scores for that set. Does not
+    normalize scores, and sets weight value on ranking terms to 0.25
 
     :param dataset: the dataset from which to reference data from
     :type dataset: str
@@ -559,23 +577,19 @@ def dump_ssGSEA_scores(dataset, tag):
     #for each gene set
     count = counter()
     for set in gene_sets.keys():
-    #for set in [key for key in gene_sets.keys() if key == "FARMER_BREAST_CANCER_CLUSTER_6"]:
         gene_set = gene_sets[set].genes
 
         #go through all the samples and calculate the ES
         scores = {}
         for id in samples.keys():
-        #for id in [38, 148, 179, 323, 378, 401, 271]:
             profile = samples[id].profiles
             expressions = {}
 
             for gene in profile.keys():
                 expressions[gene] = profile[gene].intensity
 
-            #ToDo: change weight parameter?
             score = calculate_enrichment_score(gene_set, expressions, 0.25)
 
-            #ToDo: normalize scores?
             scores[id] = sum(score)
 
         paths[set] = scores
@@ -631,7 +645,7 @@ def dump_bayes_scores(dataset, mode, tag):
 
     max_expression = {}
     min_negative_expression = {}
-    #first normalize gene expression values
+    #first normalize gene expression value
     for id in samples:
         sample = samples[id]
         for gene in sample.profiles.keys():
@@ -706,7 +720,7 @@ def dump_null_scores(dataset, tag):
     Dumps a dictionary mapping gene set to a dicitonary mapping id's to enrichment scores for that set (random scorse)
     '''
     if not os.path.exists(NULL_SCORES_DIR(dataset)):
-        os.makedirs(NULL_SCORES_DIR(datase))
+        os.makedirs(NULL_SCORES_DIR(dataset))
 
     gene_sets = load_filtered_gene_sets(dataset)
     samples = load_sample_profiles(dataset)
