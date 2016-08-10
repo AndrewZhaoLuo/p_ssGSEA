@@ -1,5 +1,5 @@
 '''
-This file contains scripts for running stuff man
+This file contains scripts for running things. More detail can be broken down in additional documentation
 '''
 
 from multiprocessing import Pool
@@ -19,21 +19,13 @@ from analyze_enrichment import evaluate_rankings_keyed
 
 import pickle
 import random
+import sys
 
 DEFAULT_NUM_PROCESSES = 7
 
 def run_analysis_on_dataset(NUM_PROCESSES, data_set, n, pheno_sample, gene_options='all', test='ssGSEA'):
     '''
-    Given data_set, and n which is the number of replicates for the experiment:
-    for every gene in the data_set for which there exists a filtered gene set, creates imaginary phenotypes for every
-    sample using a gaussian mixture model. Imaginary phenotypes are then used to fit gaussian models of enrichment values
-    for each gene set. A gene set is considered "intersting" if the generated models can seperate. This is done
-    by a t-test of the class sepearated enrichment data. Gene ranking is done by looking at the sets in which the
-    master gene belongs. The master gene should show up at the very top of the sets.
-
-    ToDo: finish doc
-
-    ToDo: get rid of hackey things done in this evil abomination of code. My mentors are crying in their sleep
+    Runs gene set enrichment analysis with a chosen single sample method
     '''
 
     print("Starting analysis...")
@@ -125,32 +117,33 @@ def run_analysis_on_dataset(NUM_PROCESSES, data_set, n, pheno_sample, gene_optio
     f.close()
 
 def main(argv):
-    if len(argv) < 4:
-        print("Usage: python runner.py [NUM_PROCESSES] [REPLICATES] [SAMPLES_PER_REPLICATE] [TEST: ssGSEA | bayes_high | bayes_low | bayes_mid] <...GENES, empty for all>")
+    if len(argv) < 5:
+        print("Usage: python runner.py [NUM_PROCESSES] [DATA_SET] [REPLICATES] [SAMPLES_PER_REPLICATE] [TEST: ssGSEA | bayes_high | bayes_low | bayes_mid] <...GENES, empty for all>")
         return
 
     NUM_PROCESSES = int(argv[0])
-    REPLICATES = int(argv[1])
-    SAMPLES_PER_REPLICATE = int(argv[2])
-    TEST = str(argv[3])
+    DATA_SET = str(argv[1])
+    REPLICATES = int(argv[2])
+    SAMPLES_PER_REPLICATE = int(argv[3])
+    TEST = str(argv[4])
 
     genes = []
-    if len(argv) < 5:
+    if len(argv) < 6:
         genes = 'all'
     else:
-        genes = [gene for gene in argv[4:]]
+        genes = [gene for gene in argv[5:]]
 
     print("Starting analysis...")
 
     #run algo
     import timeit
     start = timeit.default_timer()
-    run_analysis_on_dataset(NUM_PROCESSES, "BC", REPLICATES, SAMPLES_PER_REPLICATE, gene_options=genes, test=TEST)
+    run_analysis_on_dataset(NUM_PROCESSES, DATA_SET, REPLICATES, SAMPLES_PER_REPLICATE, gene_options=genes, test=TEST)
     end = timeit.default_timer()
 
     #reset output to terminal and print results!
     print("Took " + str(end - start) + "s")
 
 if __name__ == "__main__":
-    import sys
+    #only grab actual arguements, sys.argv[0] is always the name of the script
     main(sys.argv[1:])
