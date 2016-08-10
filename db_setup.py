@@ -1,15 +1,11 @@
 '''
-This is a simple series of script which sets up and retrieves information from the database
+This is a simple series of script which sets up and retrieves information for the BC database
 
-IN GENERAL THIS MESSES WITH THE DB SCHEMA, DONT MESS WITH UNLESS YOU KNOW WHAT YOU ARE DOING!!!
+See documentation for how to import things in the future.
 
 Note database naming is standarized! There is always a column with Gene, Intensity and Sample in Expression.
 Furthermore all dataset prefixes (ie BC) should be taked on to the beginning of Expression.db or Clinical.db
 to find the proper database!
-
-Known problems: genes like OCT11 get reformatted to 11-Oct -_-
-
-ToDo: make code more reusable using row/text factories, proper documentation
 '''
 
 import process_BC_data as BC
@@ -76,12 +72,8 @@ def create_BC_Clinical_db():
     cursor.commit()
     cursor.close()
 
-'''
-GENE_SET DATABASE
-''' 
 GENE_SET_DIR = "./Data/AppCache/"
 GENE_SET_DB = GENE_SET_DIR + "GeneSets.db"
-
 def create_GeneSet_schema_sets(cursor):
     cursor.execute('''CREATE TABLE GeneSet_URL
         (GeneSet text, URL text)''')

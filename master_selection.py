@@ -101,7 +101,7 @@ def findDecisionBoundary(mu1, sigma1, mu2, sigma2):
     :param sigma2: the standard deviation of the second distribution
     :type sigma2: float
 
-    :returns the decision boundary as a float
+    :returns: the decision boundary as a float
 
     """
     return (mu1 * sigma2 - mu2 * sigma1) / (sigma2 - sigma1)
@@ -153,9 +153,9 @@ def calculate_populairity(gene, gene_sets):
     :type gene: str
 
     :param gene_sets: a map of gene_set names to gene_set objects
-    :type: dict
+    :type gene_sets: dict
 
-    :returns: the number of times the gene appears in the given gene set
+    :returns: the number of times the gene appears in the given gene sets
     '''
 
     return sum([1 for key in gene_sets.keys() if gene in gene_sets[key].genes])

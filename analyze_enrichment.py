@@ -10,8 +10,7 @@ def analyze_phenotype_score_dist(enrichment_scores, phenotype, gene_set):
     Given a series of enrichment scores and phenotypes, returns a pair of lists where each list contains the
     enrichment scores for class 0/1 phenotypes
 
-    :param enrichment_scores: a mapping of gene_sets to a mapping of id's to the enrichment score for
-    the gene_set
+    :param enrichment_scores: a mapping of gene_sets to a mapping of id's to the enrichment score for \the gene_set
     :type enrichment_scores: dict
 
     :param phenotype: a mapping of id's to the sample's phenotype, either 0 or 1s

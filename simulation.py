@@ -16,7 +16,7 @@ def simulate_data(models, master_gene_name, sample_profiles, n):
 
     :param models: a mapping of gene names to the gaussian mixture model (GMM) for each gene.
     :type models: dict
-mean
+
     :param master_gene_name: the gene to be used as the master gene for phenotype simulation
     :type master_gene_name: str
 
