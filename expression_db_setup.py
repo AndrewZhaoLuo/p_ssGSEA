@@ -9,7 +9,7 @@ from process_BC_data import BC_EXPRESSION_DIR
 
 #general
 DB_BASE_DIR = lambda data_set: os.getcwd() + "/Data/AppCache/" + data_set + "/"
-DB_GENE_EXPRESSION = lambda data_set: data_set + "_GeneExpression.db"
+DB_GENE_EXPRESSION = lambda data_set: data_set + "Expression.db"
 TABLE_GENE_EXPRESSION = lambda  data_set: data_set + "_GeneExpression"
 
 #Schema
